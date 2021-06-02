@@ -1,0 +1,3 @@
+[submodule "libs/cosy"]
+	path = libs/cosy
+	url = https://github.com/anissen/cosy
