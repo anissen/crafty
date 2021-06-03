@@ -1,3 +1,6 @@
 [submodule "libs/cosy"]
 	path = libs/cosy
 	url = https://github.com/anissen/cosy
+[submodule "Kha"]
+	path = Kha
+	url = https://github.com/Kode/Kha
