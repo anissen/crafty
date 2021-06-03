@@ -6,7 +6,8 @@ project.localLibraryPath = 'libs';
 
 // project.addParameter('--times'); // (DK) show haxe compiler durations
 // project.addDefine('macro-times');
-project.addParameter('-dce full');
+// project.addParameter('-dce full');
+project.addParameter('-dce std');
 project.addDefine('analyzer_optimize');
 
 project.addAssets('assets/**');
