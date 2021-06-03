@@ -66,7 +66,7 @@ class Main {
 	public static function main() {
         setFullWindowCanvas();
 
-		System.start({title: "Project", width: screenWidth, height: screenHeight}, function (_) {
+		System.start({title: "Cosy Breakout", width: screenWidth, height: screenHeight}, function (_) {
 			// Just loading everything is ok for small projects
 			Assets.loadEverything(function () {
                 // Avoid passing update/render directly, so replacing them via code injection works

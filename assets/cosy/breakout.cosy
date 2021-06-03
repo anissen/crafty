@@ -13,6 +13,6 @@ color('#00ff00')
 for x in 0..5 {
     for y in 0..5 {
         // image('tile_crate', x * (200 + sin(time) * 50), 100 + y * (200 + sin(time) * 50))
-        rect(x * (200 + sin(time) * 50), 100 + y * (200 + sin(time) * 50), 100, 100)
+        rect(32 + x * (200 + sin(time) * 50), 100 + y * (200 + sin(time) * 50), 100, 100)
     }
 }
