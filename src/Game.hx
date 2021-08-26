@@ -13,7 +13,7 @@ class Game {
         Cosy.setVariable('time', System.time);
         Cosy.setFunction('sin', (args) -> return Math.sin(args[0]));
         Cosy.setFunction('color', (args) -> backbuffer.g2.color = kha.Color.fromString((args[0]: String)));
-        Cosy.setFunction('rect', (args) -> {
+        Cosy.setFunction('fill_rect', (args) -> {
             final x = (args[0]: Float);
             final y = (args[1]: Float);
             final width = (args[2]: Float);
@@ -45,7 +45,7 @@ class Game {
 		g2.begin(true, kha.Color.White);
 
         g2.color = kha.Color.Green;
-        g2.font = Assets.fonts.kenpixel_mini_square;        
+        g2.font = Assets.fonts.kenpixel_mini_square;
         g2.fontSize = 48;
         Cosy.setVariable('time', System.time);
         Cosy.run(script);

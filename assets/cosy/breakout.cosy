@@ -1,7 +1,7 @@
 
 // foreign fn image(img Str, x Num, y Num) Void
 foreign fn text(str Str, x Num, y Num) Void
-foreign fn rect(x Num, y Num, width Num, height Num) Void
+foreign fn fill_rect(x Num, y Num, width Num, height Num) Void
 foreign fn color(c Str) Void
 foreign fn sin(v Num) Num
 foreign var time Num
@@ -13,6 +13,15 @@ color('#00ff00')
 for x in 0..5 {
     for y in 0..5 {
         // image('tile_crate', x * (200 + sin(time) * 50), 100 + y * (200 + sin(time) * 50))
-        rect(32 + x * (200 + sin(time) * 50), 100 + y * (200 + sin(time) * 50), 100, 100)
+        fill_rect(32 + x * (200 + sin(time) * 50), 100 + y * (200 + sin(time) * 50), 100, 100)
     }
 }
+
+// fn draw() {
+//     color('#00ff00')
+//     for x in 0..5 {
+//         for y in 0..5 {
+//             fill_rect(32 + x * 50, 100 + y * 50, 100, 100)
+//         }
+//     }
+// }
