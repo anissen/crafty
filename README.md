@@ -1,3 +1,3 @@
-# Fighting Words: A Cosy Roguelike
+# Cosy Breakout
 
-A small game using my own language, Cosy.
+An small work-in-progress Breakout game scripted using [Cosy](https://github.com/anissen/cosy).
