@@ -2,7 +2,6 @@ package;
 
 import kha.input.Mouse;
 import kha.Assets;
-import kha.Color;
 import kha.Framebuffer;
 import kha.Scheduler;
 import kha.System;
@@ -72,11 +71,10 @@ class Main {
                 // Avoid passing update/render directly, so replacing them via code injection works
                 backbuffer = kha.Image.createRenderTarget(screenWidth, screenHeight);
 
-                game = new Game();
-                game.backbuffer = backbuffer;
-                game.script = Assets.blobs.get('breakout_cosy').toString();
+                final script = Assets.blobs.get('breakout_cosy').toString();
+                game = new Game(script, backbuffer);
 
-                if (!Cosy.validate(game.script)) {
+                if (!Cosy.validate(script)) {
                     trace('Script errors!');
                     return;
                 }
