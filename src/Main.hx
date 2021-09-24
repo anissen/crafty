@@ -22,20 +22,20 @@ class Main {
     public static var backbuffer: kha.Image;
     static var game: Game;
 
-	static function render(frames: Array<Framebuffer>): Void {
+    static function render(frames: Array<Framebuffer>): Void {
         game.render();
 
         // Scale to hi-DPI screens if required
-		final fb = frames[0];
+        final fb = frames[0];
         final g2scaled = fb.g2;
         g2scaled.begin();
         Scaler.scale(backbuffer, fb, System.screenRotation);
         g2scaled.end();
-	}
-	
+    }
+    
     static function update(): Void {
         game.update();
-	}
+    }
 
     static function mouseMove(x, y, moveX, moveY) {
         // trace(x);
@@ -62,12 +62,12 @@ class Main {
         #end
     }
 
-	public static function main() {
+    public static function main() {
         setFullWindowCanvas();
 
-		System.start({title: "Cosy Breakout", width: screenWidth, height: screenHeight}, function (_) {
-			// Just loading everything is ok for small projects
-			Assets.loadEverything(function () {
+        System.start({title: "Cosy Breakout", width: screenWidth, height: screenHeight}, function (_) {
+            // Just loading everything is ok for small projects
+            Assets.loadEverything(function () {
                 // Avoid passing update/render directly, so replacing them via code injection works
                 backbuffer = kha.Image.createRenderTarget(screenWidth, screenHeight);
 
@@ -79,10 +79,10 @@ class Main {
                     return;
                 }
 
-				Scheduler.addTimeTask(function () { update(); }, 0, 1 / 60);
+                Scheduler.addTimeTask(function () { update(); }, 0, 1 / 60);
                 System.notifyOnFrames(function (frames) { render(frames); });
                 Mouse.get().notify(null, null, mouseMove, null, null);
-			});
+            });
         });
-	}
+    }
 }

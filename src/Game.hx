@@ -42,13 +42,13 @@ class Game {
         statements = compiler.parse(script);
     }
 
-	public function update(): Void {
+    public function update(): Void {
         // ...
-	}
+    }
 
-	public function render(): Void {
+    public function render(): Void {
         var g2 = backbuffer.g2;
-		g2.begin(true, kha.Color.White);
+        g2.begin(true, kha.Color.White);
 
         g2.color = kha.Color.Green;
         g2.font = Assets.fonts.kenpixel_mini_square;
@@ -57,6 +57,6 @@ class Game {
         // compiler.run(script); // TODO: Should be AST or Program
         compiler.runStatements(statements);
 
-		g2.end();
-	}
+        g2.end();
+    }
 }
