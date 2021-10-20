@@ -42,6 +42,10 @@ class Game {
         statements = compiler.parse(script);
     }
 
+    public function isScriptValid() {
+        return statements != null;
+    }
+
     public function update(): Void {
         // ...
     }
@@ -54,7 +58,6 @@ class Game {
         g2.font = Assets.fonts.kenpixel_mini_square;
         g2.fontSize = 48;
         compiler.setVariable('time', System.time);
-        // compiler.run(script); // TODO: Should be AST or Program
         compiler.runStatements(statements);
 
         g2.end();
