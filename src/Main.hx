@@ -74,7 +74,7 @@ class Main {
                 final script = Assets.blobs.get('breakout_cosy').toString();
                 game = new Game(script, backbuffer);
 
-                if (!Cosy.validate(script)) {
+                if (!game.isScriptValid()) {
                     trace('Script errors!');
                     return;
                 }
