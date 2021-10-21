@@ -2,12 +2,14 @@ package;
 
 import kha.Assets;
 import kha.System;
+import zui.*;
 
 class Game {
     public var backbuffer: kha.Image;
     public var script: String;
     var statements: Array<cosy.Stmt>;
     var compiler: cosy.Compiler;
+    var ui = new Zui({font: Assets.fonts.DroidSans, scaleFactor: 2.0 });
 
     public function new(script: String, backbuffer: kha.Image) {
         this.script = script;
@@ -61,5 +63,43 @@ class Game {
         compiler.runStatements(statements);
 
         g2.end();
+
+        ui.begin(g2);
+		if (ui.window(Id.handle(), 0, 0, backbuffer.width, backbuffer.height, false)) {
+			if (ui.panel(Id.handle({selected: true}), "Panel")) {
+				ui.indent();
+				ui.text("Text");
+				ui.textInput(Id.handle({text: "Hello"}), "Input");
+				ui.button("Button");
+				if (ui.isHovered) ui.tooltip("Tooltip Bubble!\nWith multi-line support!\nWoo!");
+
+                // Ext.textArea(ui, Id.handle({text: "Text\nArea!"}));
+                Ext.textArea(ui, Id.handle({text: script}));
+
+				ui.check(Id.handle(), "Check Box");
+				var hradio = Id.handle();
+				ui.radio(hradio, 0, "Radio 1");
+				ui.radio(hradio, 1, "Radio 2");
+				ui.radio(hradio, 2, "Radio 3");
+				Ext.inlineRadio(ui, Id.handle(), ["High", "Medium", "Low"]);
+				ui.combo(Id.handle(), ["Item 1", "Item 2", "Item 3"], "Combo", true);
+				if (ui.panel(Id.handle({selected: false}), "Nested Panel")) {
+					ui.indent();
+					ui.text("Row");
+					ui.row([2/5, 2/5, 1/5]);
+					ui.button("A");
+					ui.button("B");
+					ui.check(Id.handle(), "C");
+					ui.unindent();
+				}
+				Ext.floatInput(ui, Id.handle({value: 42.0}), "Float Input");
+				ui.slider(Id.handle({value: 0.2}), "Slider", 0, 1);
+				if (ui.isHovered) ui.tooltip("Slider tooltip");
+				ui.slider(Id.handle({value: 0.4}), "Slider 2", 0, 1.2, true);
+				ui.separator();
+				ui.unindent();
+			}
+		}
+		ui.end();
     }
 }
