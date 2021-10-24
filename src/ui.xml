@@ -1,0 +1,36 @@
+
+<sidebar width="100%" height="500" position="top" method="float" modal="true" hidden="false">
+    <vbox width="100%">
+        <splitter width="100%" height="500">
+            <frame text="Code" width="100%" height="100%">
+                <vbox width="100%" height="100%">
+                    <textarea id="script" width="100%" height="100%" text="I am a text area 1" style="font-size: 16px; font-name: 'BrassMono';" />
+                    <button width="100%" text="Reload" />
+                </vbox>
+            </frame>
+            <frame text="Issues" width="100%" height="100%">
+                <listview width="100%" height="100%">
+                    <item-renderer width="100%" layoutName="horizontal">
+                        <image resource="haxeui-core/styles/default/haxeui_small.png" verticalAlign="center" />
+                        <vbox width="100%">
+                            <label id="text" width="100%" style="font-bold: true;font-underline:true;" />
+                            <label id="subText" width="100%" style="color: #888888;font-size:12px;" />
+                        </vbox>
+                        <button id="action" verticalAlign="center" />
+                    </item-renderer>
+                    <data>
+                        <item text="Item 1" subText="Sub text for item 1" action="Action 1" />
+                        <item text="Item 2" subText="Sub text for item 2" action="Action 2" />
+                        <item text="Item 3" subText="Sub text for item 3" action="Action 3" />
+                        <item text="Item 4" subText="Sub text for item 4" action="Action 4" />
+                        <item text="Item 5" subText="Sub text for item 5" action="Action 5" />
+                        <item text="Item 6" subText="Sub text for item 6" action="Action 6" />
+                        <item text="Item 7" subText="Sub text for item 7" action="Action 7" />
+                        <item text="Item 8" subText="Sub text for item 8" action="Action 8" />
+                        <item text="Item 9" subText="Sub text for item 9" action="Action 9" />
+                    </data>
+                </listview>
+            </frame>
+        </splitter>
+    </vbox>
+</sidebar>

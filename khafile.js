@@ -17,4 +17,7 @@ project.addSources('src');
 project.addLibrary('cosy-dev/src');
 // project.addLibrary('cosy'); // without /src requires a haxelib.json file with classPath set to "src"
 
+project.addLibrary('haxeui-core');
+project.addLibrary('haxeui-kha');
+
 resolve(project);

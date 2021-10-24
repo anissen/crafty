@@ -9,10 +9,26 @@ class Game {
     var statements: Array<cosy.Stmt>;
     var compiler: cosy.Compiler;
 
+    final screen = haxe.ui.core.Screen.instance;
+    final ui = haxe.ui.macros.ComponentMacros.buildComponent("ui.xml");
+    // final ui = haxe.ui.macros.ComponentMacros.buildComponentFromString(Assets.blobs.get('ui_xml').toString());
+
     public function new(script: String, backbuffer: kha.Image) {
         this.script = script;
         compiler = cosy.Cosy.createCompiler();
         this.backbuffer = backbuffer;
+
+        ui.show();
+        // haxe.Timer.delay(ui.hide, 5000);
+        screen.addComponent(ui);
+
+        // for (comp in ui.namedComponents.filter((comp) -> comp.id == 'script')) {
+        //     comp.text = script;
+        // }
+        var scriptArea = ui.findComponent("script");
+        if (scriptArea != null) {
+            scriptArea.text = script;
+        }
 
         compiler.setVariable('time', System.time);
         compiler.setFunction('sin', (args) -> return Math.sin(args[0]));
@@ -55,10 +71,15 @@ class Game {
         g2.begin(true, kha.Color.White);
 
         g2.color = kha.Color.Green;
-        g2.font = Assets.fonts.kenpixel_mini_square;
+        g2.font = Assets.fonts.DroidSans;
         g2.fontSize = 48;
         compiler.setVariable('time', System.time);
         compiler.runStatements(statements);
+
+        // haxe.ui.Toolkit.scaleX = (backbuffer.width / Main.screenWidth);
+        // haxe.ui.Toolkit.scaleY = (backbuffer.height / Main.screenHeight);
+        g2.color = kha.Color.White;
+        screen.renderTo(g2);
 
         g2.end();
     }
