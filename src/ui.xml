@@ -1,5 +1,5 @@
 
-<sidebar width="100%" height="500" position="top" method="float" modal="true" hidden="false">
+<sidebar width="100%" height="500" position="top" method="float" modal="true" hidden="true">
     <vbox width="100%">
         <splitter width="100%" height="500">
             <frame text="Code" width="100%" height="100%">

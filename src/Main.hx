@@ -71,8 +71,8 @@ class Main {
                 // Avoid passing update/render directly, so replacing them via code injection works
                 backbuffer = kha.Image.createRenderTarget(screenWidth, screenHeight);
 
-                haxe.ui.Toolkit.theme = "dark";
-                // haxe.ui.Toolkit.theme = "kenney";
+                // haxe.ui.Toolkit.theme = "dark";
+                haxe.ui.Toolkit.theme = "kenney";
                 haxe.ui.Toolkit.init({ showFPS: true });
 
                 final script = Assets.blobs.breakout_cosy.toString();

@@ -11,7 +11,6 @@ class Game {
 
     final screen = haxe.ui.core.Screen.instance;
     final ui = haxe.ui.macros.ComponentMacros.buildComponent("ui.xml");
-    // final ui = haxe.ui.macros.ComponentMacros.buildComponentFromString(Assets.blobs.get('ui_xml').toString());
 
     public function new(script: String, backbuffer: kha.Image) {
         this.script = script;
@@ -19,12 +18,8 @@ class Game {
         this.backbuffer = backbuffer;
 
         ui.show();
-        // haxe.Timer.delay(ui.hide, 5000);
         screen.addComponent(ui);
 
-        // for (comp in ui.namedComponents.filter((comp) -> comp.id == 'script')) {
-        //     comp.text = script;
-        // }
         var scriptArea = ui.findComponent("script");
         if (scriptArea != null) {
             scriptArea.text = script;
@@ -70,14 +65,11 @@ class Game {
         var g2 = backbuffer.g2;
         g2.begin(true, kha.Color.White);
 
-        g2.color = kha.Color.Green;
         g2.font = Assets.fonts.DroidSans;
         g2.fontSize = 48;
         compiler.setVariable('time', System.time);
         compiler.runStatements(statements);
 
-        // haxe.ui.Toolkit.scaleX = (backbuffer.width / Main.screenWidth);
-        // haxe.ui.Toolkit.scaleY = (backbuffer.height / Main.screenHeight);
         g2.color = kha.Color.White;
         screen.renderTo(g2);
 

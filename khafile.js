@@ -19,5 +19,6 @@ project.addLibrary('cosy-dev/src');
 
 project.addLibrary('haxeui-core');
 project.addLibrary('haxeui-kha');
+project.addLibrary('haxeui-theme-kenney');
 
 resolve(project);
