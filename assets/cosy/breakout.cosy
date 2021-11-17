@@ -4,10 +4,10 @@ foreign fn text(str Str, x Num, y Num) Void
 foreign fn fill_rect(x Num, y Num, width Num, height Num) Void
 foreign fn background(c Str) Void
 foreign fn color(c Str) Void
-foreign fn sin(v Num) Num
-foreign var time Num
+// foreign fn sin(v Num) Num
+// foreign var time Num
 foreign var mouse_x Num
-foreign var mouse_y Num
+// foreign var mouse_y Num
 
 // colors from here: https://lospec.com/palette-list/bluedream4
 var color_background = '#ecf2cb'
@@ -20,16 +20,39 @@ background(color_background)
 color(color_primary)
 text('Cosy Breakout!', 200, 20)
 
+var screen_width = 800
+var screen_height = 600
+var brick_width = 100
+var brick_height = 50
+var brick_padding = 20
+
+// bricks
 color(color_secondary)
-for x in 0..5 {
+for x in 0..6 {
     for y in 0..5 {
-        fill_rect(32 + x * (150 + sin(time * 2) * 10), 100 + y * (100 + sin(time * 2) * 10), 100, 50)
+        fill_rect(50 + x * (brick_width + brick_padding), 100 + y * (brick_height + brick_padding), brick_width, brick_height)
     }
 }
 
+// paddle
 color(color_tertiary)
-var size = 100
-fill_rect(mouse_x - size / 2, mouse_y - size / 2, size, size)
+var paddle_width = 100
+var paddle_height = 20
+mut paddle_x = mouse_x - paddle_width / 2
+if paddle_x < 0 {
+    paddle_x = 0
+} else if paddle_x > screen_width - paddle_width {
+    paddle_x = screen_width - paddle_width
+}
+var paddle_y = screen_height - paddle_height / 2 - 50
+fill_rect(paddle_x, paddle_y, paddle_width, paddle_height)
+
+// ball
+color(color_primary)
+var ball_radius = 15
+var ball_x = screen_width / 2 - ball_radius / 2
+var ball_y = paddle_y - 20 - ball_radius / 2
+fill_rect(ball_x, ball_y, ball_radius, ball_radius)
 
 // fn draw() {
 //     color('#00ff00')
