@@ -60,7 +60,7 @@ class Game {
         g2.begin(true, kha.Color.White);
 
         g2.color = kha.Color.Green;
-        g2.font = Assets.fonts.kenpixel_mini_square;
+        g2.font = Assets.fonts.brass_mono_regular;
         g2.fontSize = 48;
         compiler.setVariable('time', System.time);
         compiler.runStatements(statements);
