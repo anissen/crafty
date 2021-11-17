@@ -8,15 +8,6 @@ import kha.Scheduler;
 import kha.System;
 import kha.Scaler;
 
-#if kha_html5
-import kha.Macros;
-import js.html.CanvasElement;
-import js.Browser.document;
-import js.Browser.window;
-#end
-
-import cosy.Cosy;
-
 class Main {
     public static inline var screenWidth = 800;
     public static inline var screenHeight = 600;
@@ -36,11 +27,7 @@ class Main {
     
     static function update(): Void {
         game.update();
-    }
-
-    static function mouseMove(x: Float, y: Float, moveX: Float, moveY: Float): Void {
-        // trace(x);
-    }
+    } 
     
     static function keyDown(key: kha.input.KeyCode) {
         if (key == kha.input.KeyCode.Escape) {
@@ -48,23 +35,23 @@ class Main {
         }
     }
 
-    static function setFullWindowCanvas():Void {
+    static function setFullWindowCanvas(): Void {
         #if kha_html5
         //make html5 canvas resizable
-        document.documentElement.style.padding = "0";
-        document.documentElement.style.margin = "0";
-        document.body.style.padding = "0";
-        document.body.style.margin = "0";
-        var canvas:CanvasElement = cast document.getElementById(Macros.canvasId());
+        js.Browser.document.documentElement.style.padding = "0";
+        js.Browser.document.documentElement.style.margin = "0";
+        js.Browser.document.body.style.padding = "0";
+        js.Browser.document.body.style.margin = "0";
+        var canvas: js.html.CanvasElement = cast js.Browser.document.getElementById(kha.Macros.canvasId());
         canvas.style.display = "block";
 
         var resize = function() {
-            canvas.width = Std.int(window.innerWidth * window.devicePixelRatio);
-            canvas.height = Std.int(window.innerHeight * window.devicePixelRatio);
-            canvas.style.width = document.documentElement.clientWidth + "px";
-            canvas.style.height = document.documentElement.clientHeight + "px";
+            canvas.width = Std.int(js.Browser.window.innerWidth * js.Browser.window.devicePixelRatio);
+            canvas.height = Std.int(js.Browser.window.innerHeight * js.Browser.window.devicePixelRatio);
+            canvas.style.width = js.Browser.document.documentElement.clientWidth + "px";
+            canvas.style.height = js.Browser.document.documentElement.clientHeight + "px";
         }
-        window.onresize = resize;
+        js.Browser.window.onresize = resize;
         resize();
         #end
     }
@@ -108,17 +95,11 @@ class Main {
                 // Avoid passing update/render directly, so replacing them via code injection works
                 backbuffer = kha.Image.createRenderTarget(screenWidth, screenHeight);
 
-                final script = Assets.blobs.breakout_cosy.toString();
-                
                 game = new Game(backbuffer);
-                // if (!game.isScriptValid()) {
-                //     trace('Script errors!');
-                //     return;
-                // }
 
                 Scheduler.addTimeTask(function () { update(); }, 0, 1 / 60);
                 System.notifyOnFrames(function (frames) { render(frames); });
-                Mouse.get().notify(null, null, mouseMove, null, null);
+                Mouse.get().notify(null, null, game.mouseMove, null, null);
                 Keyboard.get().notify(keyDown);
             });
         });

@@ -2,20 +2,34 @@
 // foreign fn image(img Str, x Num, y Num) Void
 foreign fn text(str Str, x Num, y Num) Void
 foreign fn fill_rect(x Num, y Num, width Num, height Num) Void
+foreign fn background(c Str) Void
 foreign fn color(c Str) Void
 foreign fn sin(v Num) Num
 foreign var time Num
+foreign var mouse_x Num
+foreign var mouse_y Num
 
-color('#0000ff')
+// colors from here: https://lospec.com/palette-list/bluedream4
+var color_background = '#ecf2cb'
+var color_primary = '#1f285d'
+var color_secondary = '#4b849a'
+var color_tertiary = '#98d8b1'
+
+background(color_background)
+
+color(color_primary)
 text('Cosy Breakout!', 200, 20)
 
-color('#00ff00')
+color(color_secondary)
 for x in 0..5 {
     for y in 0..5 {
-        // image('tile_crate', x * (200 + sin(time) * 50), 100 + y * (200 + sin(time) * 50))
-        fill_rect(32 + x * (200 + sin(time) * 50), 100 + y * (200 + sin(time) * 50), 100, 100)
+        fill_rect(32 + x * (150 + sin(time * 2) * 10), 100 + y * (100 + sin(time * 2) * 10), 100, 50)
     }
 }
+
+color(color_tertiary)
+var size = 100
+fill_rect(mouse_x - size / 2, mouse_y - size / 2, size, size)
 
 // fn draw() {
 //     color('#00ff00')

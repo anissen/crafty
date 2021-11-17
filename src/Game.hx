@@ -9,12 +9,17 @@ class Game {
     var statements: Array<cosy.Stmt> = [];
     var errors: Array<String> = [];
 
+    var clearColor = kha.Color.White;
+
     public function new(backbuffer: kha.Image) {
         compiler = cosy.Cosy.createCompiler();
         this.backbuffer = backbuffer;
 
         compiler.setVariable('time', System.time);
+        compiler.setVariable('mouse_x', 0);
+        compiler.setVariable('mouse_y', 0);
         compiler.setFunction('sin', (args) -> return Math.sin(args[0]));
+        compiler.setFunction('background', (args) -> clearColor = kha.Color.fromString((args[0]: String)));
         compiler.setFunction('color', (args) -> backbuffer.g2.color = kha.Color.fromString((args[0]: String)));
         compiler.setFunction('fill_rect', (args) -> {
             final x = (args[0]: Float);
@@ -41,6 +46,11 @@ class Game {
         reloadScript();
     }
 
+    public function mouseMove(x: Float, y: Float, moveX: Float, moveY: Float): Void {
+        compiler.setVariable('mouse_x', x);
+        compiler.setVariable('mouse_y', y);
+    }
+
     function isScriptValid() {
         return statements != null;
     }
@@ -57,7 +67,7 @@ class Game {
 
     public function render(): Void {
         var g2 = backbuffer.g2;
-        g2.begin(true, kha.Color.White);
+        g2.begin(true, clearColor);
 
         g2.color = kha.Color.Green;
         g2.font = Assets.fonts.brass_mono_regular;
