@@ -1,5 +1,6 @@
 package;
 
+import kha.input.Keyboard;
 import kha.input.Mouse;
 import kha.Assets;
 import kha.Framebuffer;
@@ -37,8 +38,14 @@ class Main {
         game.update();
     }
 
-    static function mouseMove(x, y, moveX, moveY) {
+    static function mouseMove(x: Float, y: Float, moveX: Float, moveY: Float): Void {
         // trace(x);
+    }
+    
+    static function keyDown(key: kha.input.KeyCode) {
+        if (key == kha.input.KeyCode.Escape) {
+            System.stop();
+        }
     }
 
     static function setFullWindowCanvas():Void {
@@ -62,26 +69,57 @@ class Main {
         #end
     }
 
+    static function watchFile() {
+        #if sys
+        final file = haxe.io.Path.join([Sys.getCwd(), 'test.cosy']);
+        trace('Watching $file');
+        var stat = sys.FileSystem.stat(file);
+        function has_file_changed(): Bool {
+            if (stat == null) return false;
+            var new_stat = sys.FileSystem.stat(file);
+            if (new_stat == null) return false;
+            var has_changed = (new_stat.mtime.getTime() != stat.mtime.getTime());
+            stat = new_stat;
+            return has_changed;
+        }
+        function watch_file() {
+            if (has_file_changed()) {
+                var time = Date.now();
+                var text = '> "$file" changed at $time';
+                Sys.println('\033[1;34m$text\033[0m');
+                // compiler.runFile(file);
+                
+                game.reloadScript();
+            }
+        }
+        var timer = new haxe.Timer(1000);
+        timer.run = watch_file;
+        #end
+    }
+
     public static function main() {
         setFullWindowCanvas();
 
         System.start({title: "Cosy Breakout", width: screenWidth, height: screenHeight}, function (_) {
             // Just loading everything is ok for small projects
             Assets.loadEverything(function () {
+                watchFile(); 
+
                 // Avoid passing update/render directly, so replacing them via code injection works
                 backbuffer = kha.Image.createRenderTarget(screenWidth, screenHeight);
 
-                final script = Assets.blobs.get('breakout_cosy').toString();
-                game = new Game(script, backbuffer);
-
-                if (!game.isScriptValid()) {
-                    trace('Script errors!');
-                    return;
-                }
+                final script = Assets.blobs.breakout_cosy.toString();
+                
+                game = new Game(backbuffer);
+                // if (!game.isScriptValid()) {
+                //     trace('Script errors!');
+                //     return;
+                // }
 
                 Scheduler.addTimeTask(function () { update(); }, 0, 1 / 60);
                 System.notifyOnFrames(function (frames) { render(frames); });
                 Mouse.get().notify(null, null, mouseMove, null, null);
+                Keyboard.get().notify(keyDown);
             });
         });
     }

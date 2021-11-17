@@ -5,12 +5,11 @@ import kha.System;
 
 class Game {
     public var backbuffer: kha.Image;
-    public var script: String;
-    var statements: Array<cosy.Stmt>;
     var compiler: cosy.Compiler;
+    var statements: Array<cosy.Stmt> = [];
+    var errors: Array<String> = [];
 
-    public function new(script: String, backbuffer: kha.Image) {
-        this.script = script;
+    public function new(backbuffer: kha.Image) {
         compiler = cosy.Cosy.createCompiler();
         this.backbuffer = backbuffer;
 
@@ -39,13 +38,19 @@ class Game {
             return 0;
         });
 
-        statements = compiler.parse(script);
+        reloadScript();
     }
 
-    public function isScriptValid() {
+    function isScriptValid() {
         return statements != null;
     }
 
+    public function reloadScript() {
+        final script = Assets.blobs.breakout_cosy.toString();
+        statements = compiler.parse(script);
+        errors = (isScriptValid() ? [] : ['Script error(s)']);
+    }
+        
     public function update(): Void {
         // ...
     }
@@ -59,6 +64,15 @@ class Game {
         g2.fontSize = 48;
         compiler.setVariable('time', System.time);
         compiler.runStatements(statements);
+
+        if (errors.length > 0) {
+            g2.color = kha.Color.Black;
+            g2.fillRect(0, 0, backbuffer.width, backbuffer.height / 2);
+
+            g2.color = kha.Color.Red;
+            g2.fontSize = 24;
+            g2.drawString(errors.join('\n'), 10, 10);
+        }
 
         g2.end();
     }
