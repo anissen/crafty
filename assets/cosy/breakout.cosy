@@ -1,13 +1,10 @@
 
-// foreign fn image(img Str, x Num, y Num) Void
 foreign fn text(str Str, x Num, y Num) Void
 foreign fn fill_rect(x Num, y Num, width Num, height Num) Void
 foreign fn background(c Str) Void
 foreign fn color(c Str) Void
-// foreign fn sin(v Num) Num
 // foreign var time Num
 foreign var mouse_x Num
-// foreign var mouse_y Num
 
 // colors from here: https://lospec.com/palette-list/bluedream4
 var color_background = '#ecf2cb'
@@ -19,33 +16,39 @@ background(color_background)
 
 var screen_width = 800
 var screen_height = 600
+
 var brick_width = 100
 var brick_height = 50
 var brick_padding = 20
 
+var paddle_width = 100
+var paddle_height = 20
+var paddle_y = screen_height - paddle_height / 2 - 50
+
+var ball_radius = 15
+mut ball_x = screen_width / 2 - ball_radius / 2
+mut ball_y = paddle_y - 20 - ball_radius / 2
+mut ball_x_speed = 5
+mut ball_y_speed = -5
+
 struct Brick {
     var x Num
     var y Num
-    var color2 Str
+    var color Str
 }
 mut bricks Array Brick = []
 
-// fn setup() {
-    print 'setup!' 
-   // bricks
-    for x in 0..6 {
-        for y in 0..5 {
-            var brick = Brick {
-                x = 50 + x * (brick_width + brick_padding),
-                y = 100 + y * (brick_height + brick_padding),
-                color2 = color_secondary
-            }
-            bricks.push(brick)
-            // fill_rect(50 + x * (brick_width + brick_padding), 100 + y * (brick_height + brick_padding), brick_width, brick_height)
+// setup bricks
+for x in 0..6 {
+    for y in 0..5 {
+        var brick = Brick {
+            x = 50 + x * (brick_width + brick_padding),
+            y = 100 + y * (brick_height + brick_padding),
+            color = color_secondary
         }
+        bricks.push(brick)
     }
-// }
-// setup()
+}
 
 fn _update() {
     print 'update!' 
@@ -55,38 +58,29 @@ fn _update() {
 
     // bricks
     for brick in bricks {
-        color(brick.color2)
+        color(brick.color)
         fill_rect(brick.x, brick.y, brick_width, brick_height)
     }
 
     // paddle
     color(color_tertiary)
-    var paddle_width = 100
-    var paddle_height = 20
     mut paddle_x = mouse_x - paddle_width / 2
     if paddle_x < 0 {
         paddle_x = 0
     } else if paddle_x > screen_width - paddle_width {
         paddle_x = screen_width - paddle_width
     }
-    var paddle_y = screen_height - paddle_height / 2 - 50
     fill_rect(paddle_x, paddle_y, paddle_width, paddle_height)
 
     // ball
+    ball_x += ball_x_speed
+    ball_y += ball_y_speed
+    if ball_x <= 0 or ball_x + ball_radius >= screen_width {
+        ball_x_speed = -ball_x_speed
+    }
+    if ball_y <= 0 or ball_y + ball_radius >= screen_height {
+        ball_y_speed = -ball_y_speed
+    }
     color(color_primary)
-    var ball_radius = 15
-    var ball_x = screen_width / 2 - ball_radius / 2
-    var ball_y = paddle_y - 20 - ball_radius / 2
     fill_rect(ball_x, ball_y, ball_radius, ball_radius)
 }
-// update()
-
-
-// fn draw() {
-//     color('#00ff00')
-//     for x in 0..5 {
-//         for y in 0..5 {
-//             fill_rect(32 + x * 50, 100 + y * 50, 100, 100)
-//         }
-//     }
-// }
