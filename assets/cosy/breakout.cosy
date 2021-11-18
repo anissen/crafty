@@ -17,42 +17,70 @@ var color_tertiary = '#98d8b1'
 
 background(color_background)
 
-color(color_primary)
-text('Cosy Breakout!', 200, 20)
-
 var screen_width = 800
 var screen_height = 600
 var brick_width = 100
 var brick_height = 50
 var brick_padding = 20
 
-// bricks
-color(color_secondary)
-for x in 0..6 {
-    for y in 0..5 {
-        fill_rect(50 + x * (brick_width + brick_padding), 100 + y * (brick_height + brick_padding), brick_width, brick_height)
+struct Brick {
+    var x Num
+    var y Num
+    var color2 Str
+}
+mut bricks Array Brick = []
+
+// fn setup() {
+    print 'setup!' 
+   // bricks
+    for x in 0..6 {
+        for y in 0..5 {
+            var brick = Brick {
+                x = 50 + x * (brick_width + brick_padding),
+                y = 100 + y * (brick_height + brick_padding),
+                color2 = color_secondary
+            }
+            bricks.push(brick)
+            // fill_rect(50 + x * (brick_width + brick_padding), 100 + y * (brick_height + brick_padding), brick_width, brick_height)
+        }
     }
-}
+// }
+// setup()
 
-// paddle
-color(color_tertiary)
-var paddle_width = 100
-var paddle_height = 20
-mut paddle_x = mouse_x - paddle_width / 2
-if paddle_x < 0 {
-    paddle_x = 0
-} else if paddle_x > screen_width - paddle_width {
-    paddle_x = screen_width - paddle_width
-}
-var paddle_y = screen_height - paddle_height / 2 - 50
-fill_rect(paddle_x, paddle_y, paddle_width, paddle_height)
+fn _update() {
+    print 'update!' 
+   
+    color(color_primary)
+    text('Cosy Breakout!', 200, 20)
 
-// ball
-color(color_primary)
-var ball_radius = 15
-var ball_x = screen_width / 2 - ball_radius / 2
-var ball_y = paddle_y - 20 - ball_radius / 2
-fill_rect(ball_x, ball_y, ball_radius, ball_radius)
+    // bricks
+    for brick in bricks {
+        color(brick.color2)
+        fill_rect(brick.x, brick.y, brick_width, brick_height)
+    }
+
+    // paddle
+    color(color_tertiary)
+    var paddle_width = 100
+    var paddle_height = 20
+    mut paddle_x = mouse_x - paddle_width / 2
+    if paddle_x < 0 {
+        paddle_x = 0
+    } else if paddle_x > screen_width - paddle_width {
+        paddle_x = screen_width - paddle_width
+    }
+    var paddle_y = screen_height - paddle_height / 2 - 50
+    fill_rect(paddle_x, paddle_y, paddle_width, paddle_height)
+
+    // ball
+    color(color_primary)
+    var ball_radius = 15
+    var ball_x = screen_width / 2 - ball_radius / 2
+    var ball_y = paddle_y - 20 - ball_radius / 2
+    fill_rect(ball_x, ball_y, ball_radius, ball_radius)
+}
+// update()
+
 
 // fn draw() {
 //     color('#00ff00')

@@ -10,6 +10,7 @@ class Game {
     var errors: Array<String> = [];
 
     var clearColor = kha.Color.White;
+    var needsToRunSetup = false;
 
     public function new(backbuffer: kha.Image) {
         compiler = cosy.Cosy.createCompiler();
@@ -59,6 +60,12 @@ class Game {
         final script = Assets.blobs.breakout_cosy.toString();
         statements = compiler.parse(script);
         errors = (isScriptValid() ? [] : ['Script error(s)']);
+        
+        needsToRunSetup = true;
+        // trace('before runstatements');
+        // compiler.runStatements(statements);
+        // trace('after runstatements');
+        // compiler.runFunction('setup');
     }
         
     public function update(): Void {
@@ -73,7 +80,15 @@ class Game {
         g2.font = Assets.fonts.brass_mono_regular;
         g2.fontSize = 48;
         compiler.setVariable('time', System.time);
-        compiler.runStatements(statements);
+        if (needsToRunSetup) {
+            trace('before runstatements');
+            compiler.runStatements(statements);
+            needsToRunSetup = false;
+        }
+        // compiler.runStatements(statements);
+        // trace('before update'); 
+        compiler.runFunction('_update'); // the underscore is a hack to avoid flagging the function as unused
+        // trace('after update'); 
 
         if (errors.length > 0) {
             g2.color = kha.Color.Black;
