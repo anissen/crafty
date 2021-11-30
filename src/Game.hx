@@ -9,7 +9,6 @@ class Game {
     var statements: Array<cosy.Stmt> = [];
     var errors: Array<String> = [];
 
-    var clearColor = kha.Color.White;
     var needsToRunSetup = false;
 
     public function new(backbuffer: kha.Image) {
@@ -19,8 +18,15 @@ class Game {
         compiler.setVariable('time', System.time);
         compiler.setVariable('mouse_x', 0);
         compiler.setVariable('mouse_y', 0);
-        compiler.setFunction('sin', (args) -> return Math.sin(args[0]));
-        compiler.setFunction('background', (args) -> clearColor = kha.Color.fromString((args[0]: String)));
+        compiler.setFunction('sin', (args) -> Math.sin(args[0]));
+        // compiler.setFunction('background', (args) -> {
+        //     backbuffer.g2.clear(kha.Color.fromString((args[0]: String)));
+        //     return 0;
+        // });
+        compiler.setFunction('clear', (args) -> {
+            backbuffer.g2.clear(backbuffer.g2.color);
+            return 0;
+        });
         compiler.setFunction('color', (args) -> backbuffer.g2.color = kha.Color.fromString((args[0]: String)));
         compiler.setFunction('fill_rect', (args) -> {
             final x = (args[0]: Float);
@@ -62,10 +68,6 @@ class Game {
         errors = (isScriptValid() ? [] : ['Script error(s)']);
         
         needsToRunSetup = true;
-        // trace('before runstatements');
-        // compiler.runStatements(statements);
-        // trace('after runstatements');
-        // compiler.runFunction('setup');
     }
         
     public function update(): Void {
@@ -74,21 +76,16 @@ class Game {
 
     public function render(): Void {
         var g2 = backbuffer.g2;
-        g2.begin(true, clearColor);
+        g2.begin(false);
 
-        g2.color = kha.Color.Green;
         g2.font = Assets.fonts.brass_mono_regular;
         g2.fontSize = 48;
         compiler.setVariable('time', System.time);
         if (needsToRunSetup) {
-            trace('before runstatements');
             compiler.runStatements(statements);
             needsToRunSetup = false;
         }
-        // compiler.runStatements(statements);
-        // trace('before update'); 
         compiler.runFunction('_update'); // the underscore is a hack to avoid flagging the function as unused
-        // trace('after update'); 
 
         if (errors.length > 0) {
             g2.color = kha.Color.Black;
