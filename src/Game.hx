@@ -58,6 +58,38 @@ class Game {
             backbuffer.g2.drawLine(x1, y1, x2, y2, 5.0);
             return 0;
         });
+        compiler.setFunction('circle', (args) -> { 
+            var x      = (args[0]: Float);
+            var y      = (args[1]: Float);
+            var radius = (args[2]: Float);
+            var segments = Std.int(6 + Math.sqrt(radius) * 2);
+            // trace(segments);
+            var angle_per_segment = (Math.PI * 2) / segments;
+            for (i in 0...segments) {
+                var x1 = x + radius * Math.cos(angle_per_segment * i);
+                var y1 = y + radius * Math.sin(angle_per_segment * i);
+                var x2 = x + radius * Math.cos(angle_per_segment * (i + 1));
+                var y2 = y + radius * Math.sin(angle_per_segment * (i + 1));
+                backbuffer.g2.drawLine(x1, y1, x2, y2, 2.0);
+            }
+            return 0;
+        });
+        compiler.setFunction('fill_circle', (args) -> { 
+            var x      = (args[0]: Float);
+            var y      = (args[1]: Float);
+            var radius = (args[2]: Float);
+            var segments = Std.int(6 + Math.sqrt(radius) * 2);
+            // trace(segments);
+            var angle_per_segment = (Math.PI * 2) / segments;
+            for (i in 0...segments) {
+                var x1 = x + radius * Math.cos(angle_per_segment * i);
+                var y1 = y + radius * Math.sin(angle_per_segment * i);
+                var x2 = x + radius * Math.cos(angle_per_segment * (i + 1));
+                var y2 = y + radius * Math.sin(angle_per_segment * (i + 1));
+                backbuffer.g2.fillTriangle(x, y, x1, y1, x2, y2);
+            }
+            return 0;
+        });
 
         reloadScript();
     }
@@ -73,6 +105,7 @@ class Game {
 
     public function reloadScript() {
         final script = Assets.blobs.breakout_cosy.toString();
+        // final script = Assets.blobs.follow_cosy.toString();
         statements = compiler.parse(script);
         errors = (isScriptValid() ? [] : ['Script error(s)']);
         

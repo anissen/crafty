@@ -1,10 +1,9 @@
 
 foreign fn text(str Str, x Num, y Num) Void
 foreign fn fill_rect(x Num, y Num, width Num, height Num) Void
-// foreign fn background(c Str) Void
+foreign fn fill_circle(x Num, y Num, radius Num) Void
 foreign fn clear() Void
 foreign fn color(c Str) Void
-// foreign var time Num
 foreign var mouse_x Num
 
 // colors from here: https://lospec.com/palette-list/bluedream4
@@ -20,15 +19,25 @@ var brick_width = 100
 var brick_height = 50
 var brick_padding = 20
 
+// TODO: Make this a struct
 var paddle_width = 100
 var paddle_height = 20
 var paddle_y = screen_height - paddle_height / 2 - 50
 
-var ball_radius = 15
+// TODO: Make this a struct
+var ball_radius = 10
 mut ball_x = screen_width / 2 - ball_radius / 2
 mut ball_y = paddle_y - 20 - ball_radius / 2
 mut ball_x_speed = 5
-mut ball_y_speed = -5
+mut ball_y_speed = -4
+
+// struct Ball {
+//     mut x Num,
+//     mut y Num,
+//     mut x_speed Num,
+//     mut y_speed Num,
+//     var radius Num,
+// }
 
 struct Brick {
     var x Num
@@ -100,13 +109,12 @@ fn _update() { // TODO: Should include a delta time
         ball_y_speed = -ball_y_speed
     }
     color(color_primary)
-    fill_rect(ball_x, ball_y, ball_radius, ball_radius)
+    fill_circle(ball_x, ball_y, ball_radius)
 
-    // if ball_x + ball_radius >= paddle_x and ball_x <= paddle_x + paddle_width and ball_y + ball_radius >= paddle_y and ball_y <= paddle_y + paddle_height {
-    //     ball_y_speed = -ball_y_speed
-    // }
     if ball_collision(paddle_x, paddle_y, paddle_width, paddle_height) {
-        ball_y_speed = -ball_y_speed
+        ball_y_speed *= -1
+        // TODO: Should probably just rotate the speed vectors instead of overwriting them (which may even slow the ball)
+        ball_x_speed = (ball_x - (paddle_x + paddle_width / 2)) / (paddle_width / 2) * 5
     }
     
     // bricks
@@ -114,38 +122,56 @@ fn _update() { // TODO: Should include a delta time
         if brick.lives <= 0 {
             continue
         }
-        if ball_collision(brick.x, brick.y, brick_width, brick_height) {
-            brick.lives -= 1
-            ball_y_speed = -ball_y_speed
-            ball_x_speed = -ball_x_speed
-            if brick.lives <= 0 {
-                score += 1
-            }
-        } else {
-            if brick.lives == 2 { // TODO: Should be a switch/match statement
-                color(color_tertiary)
-            } else {
-                color(color_secondary)
-            }
-            fill_rect(brick.x, brick.y, brick_width, brick_height)
-        }
-        // if ball_x + ball_radius >= brick.x and ball_x <= brick.x + brick_width and ball_y + ball_radius >= brick.y and ball_y <= brick.y + brick_height {
-        //     brick.hit = true
-
-        //     if ball_y <= brick.y + brick_height and ball_y + ball_radius >= brick.y + brick_height { // bottom
-        //         ball_y_speed = -ball_y_speed
-        //     } else if ball_y <= brick.y and ball_y + ball_radius >= brick.y { // top
-        //         ball_y_speed = -ball_y_speed
-        //     } 
-        //     if ball_x <= brick.x and ball_x + ball_radius >= brick.x { // left
-        //         ball_x_speed = -ball_x_speed
-        //     } else if ball_x <= brick.x + brick_width and ball_x + ball_radius >= brick.x + brick_width { // right
-        //         ball_x_speed = -ball_x_speed
+        // if ball_collision(brick.x, brick.y, brick_width, brick_height) {
+        //     brick.lives -= 1
+        //     ball_y_speed = -ball_y_speed
+        //     ball_x_speed = -ball_x_speed
+        //     if brick.lives <= 0 {
+        //         score += 1
         //     }
         // } else {
-        //     color(brick.color)
+        //     if brick.lives == 2 { // TODO: Should be a switch/match statement
+        //         color(color_tertiary)
+        //     } else {
+        //         color(color_secondary)
+        //     }
         //     fill_rect(brick.x, brick.y, brick_width, brick_height)
         // }
+
+        var ball_top = ball_y - ball_radius
+        var ball_bottom = ball_y + ball_radius
+        var ball_right = ball_x + ball_radius
+        var ball_left = ball_x - ball_radius
+        var brick_bottom = brick.y + brick_height
+        var brick_right = brick.x + brick_width
+        var is_inside_brick_width = ball_right >= brick.x and ball_left <= brick.x + brick_width
+        var is_inside_brick_height =  ball_bottom >= brick.y and ball_top <= brick.y + brick_height
+
+        // Collision logic: ball vs bricks
+        if ball_top <= brick_bottom and ball_top > brick_bottom + ball_y_speed and is_inside_brick_width and ball_y_speed < 0 {
+            // Hit from below
+            brick.lives -= 1
+            ball_y_speed *= -1
+        } else if ball_bottom >= brick.y and ball_bottom < brick.y + ball_y_speed and is_inside_brick_width and ball_y_speed > 0 {
+            // Hit from above
+            brick.lives -= 1
+            ball_y_speed *= -1
+        } else if ball_right >= brick.x and ball_right < brick.x + ball_x_speed and is_inside_brick_height and ball_x_speed > 0 {
+            // Hit from left
+            brick.lives -= 1
+            ball_x_speed *= -1
+        } else if ball_left <= brick_right and ball_left > brick_right + ball_x_speed and is_inside_brick_height and ball_x_speed < 0 {
+            // Hit from right
+            brick.lives -= 1
+            ball_x_speed *= -1
+        }
+        
+        if brick.lives == 2 { // TODO: Should be a switch/match statement
+            color(color_tertiary)
+        } else {
+            color(color_secondary)
+        }
+        fill_rect(brick.x, brick.y, brick_width, brick_height)
     }
 
 }
