@@ -28,6 +28,7 @@ class Game {
             return 0;
         });
         compiler.setFunction('color', (args) -> backbuffer.g2.color = kha.Color.fromString((args[0]: String)));
+        compiler.setFunction('color_rgb', (args) -> backbuffer.g2.color = kha.Color.fromFloats(args[0], args[1], args[2]));
         compiler.setFunction('fill_rect', (args) -> {
             final x = (args[0]: Float);
             final y = (args[1]: Float);
@@ -47,6 +48,14 @@ class Game {
             var x = (args[1]: Float);
             var y = (args[2]: Float);
             backbuffer.g2.drawString(text, x, y);
+            return 0;
+        });
+        compiler.setFunction('line', (args) -> { 
+            var x1 = (args[0]: Float);
+            var y1 = (args[1]: Float);
+            var x2 = (args[2]: Float);
+            var y2 = (args[3]: Float);
+            backbuffer.g2.drawLine(x1, y1, x2, y2, 5.0);
             return 0;
         });
 
