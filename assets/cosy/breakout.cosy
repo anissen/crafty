@@ -64,21 +64,34 @@ for x in 0..6 {
     }
 }
 
-// fn collision(x1 Num, y1 Num, width1 Num, height1 Num, x2 Num, y2 Num, width2 Num, height2 Num) Bool { // TODO: Should probably be `fn collision(rect1 Rect, rect2 Rect)` instead
-//     return x1 < x2 + width2 && x1 + width1 > x2 && y1 < y2 + height2 && y1 + height1 > y2
-// }
-// fn ball_collision(x Num, y Num, width Num, height Num) Bool {
-//     return ball_x + ball_radius >= x and ball_x <= x + width and ball_y + ball_radius >= y and ball_y <= y + height
-// }
-
 fn ball_collision(x Num, y Num, width Num, height Num) Bool {
-    var vertical_hit   = (ball_y >= y and ball_y <= y + height) or                             // ball top inside rect
-                         (ball_y + ball_radius >= y and ball_y + ball_radius <= y + height) or // ball bottom inside rect
-                         (ball_y <= y and ball_y + ball_radius >= y + height)                  // ball contains rect
-    var horizontal_hit = (ball_x >= x and ball_x <= x + width) or                              // ball left inside rect
-                         (ball_x + ball_radius >= x and ball_x + ball_radius <= x + width) or  // ball right inside rect
-                         (ball_x <= x and ball_x + ball_radius >= x + width)                   // ball contains rect
-    return vertical_hit and horizontal_hit
+    var ball_top = ball_y - ball_radius
+    var ball_bottom = ball_y + ball_radius
+    var ball_right = ball_x + ball_radius
+    var ball_left = ball_x - ball_radius
+    var bottom = y + height
+    var right = x + width
+    var is_inside_width = ball_right >= x and ball_left <= x + width
+    var is_inside_height =  ball_bottom >= y and ball_top <= y + height
+
+    if ball_top <= bottom and ball_top > bottom + ball_y_speed and is_inside_width and ball_y_speed < 0 {
+        // Hit from below
+        ball_y_speed *= -1
+        return true
+    } else if ball_bottom >= y and ball_bottom < y + ball_y_speed and is_inside_width and ball_y_speed > 0 {
+        // Hit from above
+        ball_y_speed *= -1
+        return true
+    } else if ball_right >= x and ball_right < x + ball_x_speed and is_inside_height and ball_x_speed > 0 {
+        // Hit from left
+        ball_x_speed *= -1
+        return true
+    } else if ball_left <= right and ball_left > right + ball_x_speed and is_inside_height and ball_x_speed < 0 {
+        // Hit from right
+        ball_x_speed *= -1
+        return true
+    }
+    return false
 }
 
 fn _update() { // TODO: Should include a delta time
@@ -87,7 +100,7 @@ fn _update() { // TODO: Should include a delta time
     clear()
    
     color(color_primary)
-    text('Cosy Breakout! Score: {score}', 100, 20)
+    text('Cosy Breakout! Score: {score}', 50, 20) // TODO: Should be centered
 
     // paddle
     color(color_tertiary)
@@ -112,7 +125,6 @@ fn _update() { // TODO: Should include a delta time
     fill_circle(ball_x, ball_y, ball_radius)
 
     if ball_collision(paddle_x, paddle_y, paddle_width, paddle_height) {
-        ball_y_speed *= -1
         // TODO: Should probably just rotate the speed vectors instead of overwriting them (which may even slow the ball)
         ball_x_speed = (ball_x - (paddle_x + paddle_width / 2)) / (paddle_width / 2) * 5
     }
@@ -122,56 +134,20 @@ fn _update() { // TODO: Should include a delta time
         if brick.lives <= 0 {
             continue
         }
-        // if ball_collision(brick.x, brick.y, brick_width, brick_height) {
-        //     brick.lives -= 1
-        //     ball_y_speed = -ball_y_speed
-        //     ball_x_speed = -ball_x_speed
-        //     if brick.lives <= 0 {
-        //         score += 1
-        //     }
-        // } else {
-        //     if brick.lives == 2 { // TODO: Should be a switch/match statement
-        //         color(color_tertiary)
-        //     } else {
-        //         color(color_secondary)
-        //     }
-        //     fill_rect(brick.x, brick.y, brick_width, brick_height)
-        // }
 
-        var ball_top = ball_y - ball_radius
-        var ball_bottom = ball_y + ball_radius
-        var ball_right = ball_x + ball_radius
-        var ball_left = ball_x - ball_radius
-        var brick_bottom = brick.y + brick_height
-        var brick_right = brick.x + brick_width
-        var is_inside_brick_width = ball_right >= brick.x and ball_left <= brick.x + brick_width
-        var is_inside_brick_height =  ball_bottom >= brick.y and ball_top <= brick.y + brick_height
-
-        // Collision logic: ball vs bricks
-        if ball_top <= brick_bottom and ball_top > brick_bottom + ball_y_speed and is_inside_brick_width and ball_y_speed < 0 {
-            // Hit from below
+        if ball_collision(brick.x, brick.y, brick_width, brick_height) {
             brick.lives -= 1
-            ball_y_speed *= -1
-        } else if ball_bottom >= brick.y and ball_bottom < brick.y + ball_y_speed and is_inside_brick_width and ball_y_speed > 0 {
-            // Hit from above
-            brick.lives -= 1
-            ball_y_speed *= -1
-        } else if ball_right >= brick.x and ball_right < brick.x + ball_x_speed and is_inside_brick_height and ball_x_speed > 0 {
-            // Hit from left
-            brick.lives -= 1
-            ball_x_speed *= -1
-        } else if ball_left <= brick_right and ball_left > brick_right + ball_x_speed and is_inside_brick_height and ball_x_speed < 0 {
-            // Hit from right
-            brick.lives -= 1
-            ball_x_speed *= -1
-        }
-        
-        if brick.lives == 2 { // TODO: Should be a switch/match statement
-            color(color_tertiary)
+            if brick.lives <= 0 {
+                score += 1
+            }
         } else {
-            color(color_secondary)
+            if brick.lives == 2 { // TODO: Should be a switch/match statement
+                color(color_tertiary)
+            } else {
+                color(color_secondary)
+            }
+            fill_rect(brick.x, brick.y, brick_width, brick_height)
         }
-        fill_rect(brick.x, brick.y, brick_width, brick_height)
     }
 
 }
