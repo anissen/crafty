@@ -1,4 +1,3 @@
-
 foreign fn text(str Str, x Num, y Num) Void
 foreign fn fill_rect(x Num, y Num, width Num, height Num) Void
 foreign fn fill_circle(x Num, y Num, radius Num) Void
@@ -19,25 +18,36 @@ var brick_width = 100
 var brick_height = 50
 var brick_padding = 20
 
-// TODO: Make this a struct
 var paddle_width = 100
 var paddle_height = 20
-var paddle_y = screen_height - paddle_height / 2 - 50
 
-// TODO: Make this a struct
-var ball_radius = 10
-mut ball_x = screen_width / 2 - ball_radius / 2
-mut ball_y = paddle_y - 20 - ball_radius / 2
-mut ball_x_speed = 5
-mut ball_y_speed = -4
+struct Paddle {
+    mut x Num
+    mut y Num
+    var width Num
+    var height Num
+}
+mut paddle = Paddle {
+    x = screen_width / 2 - paddle_width / 2,
+    y = screen_height - paddle_height / 2 - 50,
+    width = 100,
+    height = 20,
+}
 
-// struct Ball {
-//     mut x Num,
-//     mut y Num,
-//     mut x_speed Num,
-//     mut y_speed Num,
-//     var radius Num,
-// }
+struct Ball {
+    mut x Num
+    mut y Num
+    mut speed_x Num
+    mut speed_y Num
+    var radius Num
+}
+mut ball = Ball { 
+    x = paddle.x + paddle.width / 2,
+    y = paddle.y - 20,
+    speed_x = 5,
+    speed_y = -5,
+    radius = 10,
+ }
 
 struct Brick {
     var x Num
@@ -65,30 +75,30 @@ for x in 0..6 {
 }
 
 fn ball_collision(x Num, y Num, width Num, height Num) Bool {
-    var ball_top = ball_y - ball_radius
-    var ball_bottom = ball_y + ball_radius
-    var ball_right = ball_x + ball_radius
-    var ball_left = ball_x - ball_radius
+    var ball_top = ball.y - ball.radius
+    var ball_bottom = ball.y + ball.radius
+    var ball_right = ball.x + ball.radius
+    var ball_left = ball.x - ball.radius
     var bottom = y + height
     var right = x + width
     var is_inside_width = ball_right >= x and ball_left <= x + width
     var is_inside_height =  ball_bottom >= y and ball_top <= y + height
 
-    if ball_top <= bottom and ball_top > bottom + ball_y_speed and is_inside_width and ball_y_speed < 0 {
+    if ball_top <= bottom and ball_top > bottom + ball.speed_y and is_inside_width and ball.speed_y < 0 {
         // Hit from below
-        ball_y_speed *= -1
+        ball.speed_y *= -1
         return true
-    } else if ball_bottom >= y and ball_bottom < y + ball_y_speed and is_inside_width and ball_y_speed > 0 {
+    } else if ball_bottom >= y and ball_bottom < y + ball.speed_y and is_inside_width and ball.speed_y > 0 {
         // Hit from above
-        ball_y_speed *= -1
+        ball.speed_y *= -1
         return true
-    } else if ball_right >= x and ball_right < x + ball_x_speed and is_inside_height and ball_x_speed > 0 {
+    } else if ball_right >= x and ball_right < x + ball.speed_x and is_inside_height and ball.speed_x > 0 {
         // Hit from left
-        ball_x_speed *= -1
+        ball.speed_x *= -1
         return true
-    } else if ball_left <= right and ball_left > right + ball_x_speed and is_inside_height and ball_x_speed < 0 {
+    } else if ball_left <= right and ball_left > right + ball.speed_x and is_inside_height and ball.speed_x < 0 {
         // Hit from right
-        ball_x_speed *= -1
+        ball.speed_x *= -1
         return true
     }
     return false
@@ -104,29 +114,29 @@ fn _update() { // TODO: Should include a delta time
 
     // paddle
     color(color_tertiary)
-    mut paddle_x = mouse_x - paddle_width / 2
-    if paddle_x < 0 {
-        paddle_x = 0
-    } else if paddle_x > screen_width - paddle_width {
-        paddle_x = screen_width - paddle_width
+    paddle.x = mouse_x - paddle.width / 2
+    if paddle.x < 0 {
+        paddle.x = 0
+    } else if paddle.x > screen_width - paddle.width {
+        paddle.x = screen_width - paddle.width
     }
-    fill_rect(paddle_x, paddle_y, paddle_width, paddle_height)
+    fill_rect(paddle.x, paddle.y, paddle.width, paddle.height)
 
     // ball
-    ball_x += ball_x_speed
-    ball_y += ball_y_speed
-    if ball_x <= 0 or ball_x + ball_radius >= screen_width {
-        ball_x_speed = -ball_x_speed
+    ball.x += ball.speed_x
+    ball.y += ball.speed_y
+    if ball.x <= 0 or ball.x + ball.radius >= screen_width {
+        ball.speed_x = -ball.speed_x
     }
-    if ball_y <= 0 or ball_y + ball_radius >= screen_height {
-        ball_y_speed = -ball_y_speed
+    if ball.y <= 0 or ball.y + ball.radius >= screen_height {
+        ball.speed_y = -ball.speed_y
     }
     color(color_primary)
-    fill_circle(ball_x, ball_y, ball_radius)
+    fill_circle(ball.x, ball.y, ball.radius)
 
-    if ball_collision(paddle_x, paddle_y, paddle_width, paddle_height) {
+    if ball_collision(paddle.x, paddle.y, paddle.width, paddle.height) {
         // TODO: Should probably just rotate the speed vectors instead of overwriting them (which may even slow the ball)
-        ball_x_speed = (ball_x - (paddle_x + paddle_width / 2)) / (paddle_width / 2) * 5
+        ball.speed_x = (ball.x - (paddle.x + paddle.width / 2)) / (paddle.width / 2) * 5
     }
     
     // bricks
@@ -149,5 +159,4 @@ fn _update() { // TODO: Should include a delta time
             fill_rect(brick.x, brick.y, brick_width, brick_height)
         }
     }
-
 }
