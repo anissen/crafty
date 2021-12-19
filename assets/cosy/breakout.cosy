@@ -3,6 +3,13 @@ foreign fn fill_rect(x Num, y Num, width Num, height Num) Void
 foreign fn fill_circle(x Num, y Num, radius Num) Void
 foreign fn clear() Void
 foreign fn color(c Str) Void
+
+foreign fn max(a Num, b Num) Num
+foreign fn min(a Num, b Num) Num
+foreign fn atan2(a Num, b Num) Num
+foreign fn cos(v Num) Num
+foreign fn sin(v Num) Num
+
 foreign var mouse_x Num
 
 // colors from here: https://lospec.com/palette-list/bluedream4
@@ -74,6 +81,30 @@ for x in 0..6 {
     }
 }
 
+// https://stackoverflow.com/a/45373126/802826
+fn handle_ball_collision(x Num, y Num, width Num, height Num) {
+    var nearest_x = max(x, min(ball.x, x + width))
+    var nearest_y = max(y, min(ball.y, y + height))    
+    var dist_x = (ball.x - nearest_x)
+    var dist_y = (ball.y - nearest_y)
+
+    if (ball.speed_x * dist_x + ball.speed_y * dist_y < 0) { // if ball is moving toward the rect
+        var normal_angle = atan2(dist_x, -dist_y)
+        var incoming_angle = atan2(ball.speed_y, ball.speed_x)
+        var theta = normal_angle - incoming_angle
+
+        var new_speed_x = ball.speed_x * cos(2 * theta) - ball.speed_y * sin(2 * theta)
+        var new_speed_y = ball.speed_x * sin(2 * theta) + ball.speed_y * cos(2 * theta)
+        ball.speed_x = new_speed_x
+        ball.speed_y = new_speed_y
+    }
+
+    
+    // var penetrationDepth = ball.radius - dist.mag()
+    // var penetrationVector = dist.normalise().mult(penetrationDepth)
+    // ball.pos = ball.sub(penetrationVector)
+}
+
 fn ball_collision(x Num, y Num, width Num, height Num) Bool {
     var ball_top = ball.y - ball.radius
     var ball_bottom = ball.y + ball.radius
@@ -86,19 +117,23 @@ fn ball_collision(x Num, y Num, width Num, height Num) Bool {
 
     if ball_top <= bottom and ball_top > bottom + ball.speed_y and is_inside_width and ball.speed_y < 0 {
         // Hit from below
-        ball.speed_y *= -1
+        // ball.speed_y *= -1
+        handle_ball_collision(x, y, width, height)
         return true
     } else if ball_bottom >= y and ball_bottom < y + ball.speed_y and is_inside_width and ball.speed_y > 0 {
         // Hit from above
-        ball.speed_y *= -1
+        // ball.speed_y *= -1
+        handle_ball_collision(x, y, width, height)
         return true
     } else if ball_right >= x and ball_right < x + ball.speed_x and is_inside_height and ball.speed_x > 0 {
         // Hit from left
-        ball.speed_x *= -1
+        // ball.speed_x *= -1
+        handle_ball_collision(x, y, width, height)
         return true
     } else if ball_left <= right and ball_left > right + ball.speed_x and is_inside_height and ball.speed_x < 0 {
         // Hit from right
-        ball.speed_x *= -1
+        // ball.speed_x *= -1
+        handle_ball_collision(x, y, width, height)
         return true
     }
     return false
