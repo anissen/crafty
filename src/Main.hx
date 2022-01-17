@@ -99,7 +99,7 @@ class Main {
 
                 Scheduler.addTimeTask(function () { update(); }, 0, 1 / 60);
                 System.notifyOnFrames(function (frames) { render(frames); });
-                Mouse.get().notify(null, null, game.mouseMove, null, null);
+                Mouse.get().notify(game.mouseDown, null, game.mouseMove, null, null);
                 Keyboard.get().notify(keyDown);
             });
         });

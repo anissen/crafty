@@ -25,12 +25,14 @@ class Game {
     var time: Float;
     var textAlign = Center;
     var textVAlign = Middle;
+    var mouseClicked = false;
 
     public function new(backbuffer: kha.Image) {
         compiler = cosy.Cosy.createCompiler();
         this.backbuffer = backbuffer;
 
         compiler.setVariable('time', System.time);
+        compiler.setVariable('mouse_clicked', false);
         compiler.setVariable('mouse_x', 0);
         compiler.setVariable('mouse_y', 0);
         compiler.setFunction('sin', (args) -> Math.sin(args[0]));
@@ -68,9 +70,9 @@ class Game {
                 case Right:  x -= backbuffer.g2.font.width(backbuffer.g2.fontSize, text);
             }
             switch textVAlign {
-                case Top:    y -= backbuffer.g2.font.height(backbuffer.g2.fontSize) / 2;
-                case Middle: 
-                case Bottom: y += backbuffer.g2.font.height(backbuffer.g2.fontSize) / 2;
+                case Top:    
+                case Middle: y -= backbuffer.g2.font.height(backbuffer.g2.fontSize) / 2;
+                case Bottom: y -= backbuffer.g2.font.height(backbuffer.g2.fontSize);
             }
             backbuffer.g2.drawString(text, x, y);
             return 0;
@@ -150,6 +152,14 @@ class Game {
         compiler.setVariable('mouse_x', x);
         compiler.setVariable('mouse_y', y);
     }
+    
+    public function mouseDown(button: Int, x: Int, y: Int): Void {
+        mouseClicked = true;
+    }
+    
+    public function mouseUp(button: Int, x: Int, y: Int): Void {
+        
+    }
 
     function isScriptValid() {
         return statements != null;
@@ -175,6 +185,8 @@ class Game {
         g2.font = Assets.fonts.brass_mono_regular;
         g2.fontSize = 48;
         compiler.setVariable('time', System.time);
+        compiler.setVariable('mouse_clicked', mouseClicked);
+        mouseClicked = false;
         if (needsToRunSetup) {
             compiler.runStatements(statements);
             needsToRunSetup = false;

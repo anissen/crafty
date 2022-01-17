@@ -10,7 +10,8 @@ foreign fn atan2(a Num, b Num) Num
 foreign fn cos(v Num) Num
 foreign fn sin(v Num) Num
 
-foreign var mouse_x Num
+foreign var mouse_x Num // TODO: Should use keyboard input instead
+foreign var mouse_clicked Bool // TODO: Should use keyboard input instead
 
 // colors from here: https://lospec.com/palette-list/bluedream4
 var color_background = '#ecf2cb'
@@ -28,20 +29,13 @@ var brick_padding = 20
 var paddle_width = 100
 var paddle_height = 20
 
-mut game_speed = 50
-
 struct Paddle {
     mut x Num
     mut y Num
     var width Num
     var height Num
 }
-mut paddle = Paddle {
-    x = screen_width / 2 - paddle_width / 2,
-    y = screen_height - paddle_height / 2 - 50,
-    width = 100,
-    height = 20,
-}
+mut paddle Paddle
 
 struct Ball {
     mut x Num
@@ -50,13 +44,7 @@ struct Ball {
     mut speed_y Num
     var radius Num
 }
-mut ball = Ball { 
-    x = paddle.x + paddle.width / 2,
-    y = paddle.y - 20,
-    speed_x = 5,
-    speed_y = -5,
-    radius = 10,
- }
+mut ball Ball
 
 struct Brick {
     var x Num
@@ -65,23 +53,54 @@ struct Brick {
 }
 mut bricks Array Brick = []
 
+var start_lives = 3
+mut lives = start_lives
+mut game_speed = 50
 mut score = 0
+mut is_started = false
 
-// setup bricks
-for x in 0..6 {
-    for y in 0..5 {
-        mut lives = 1
-        if y % 2 == 0 {
-            lives = 2
-        }
-        var brick = Brick {
-            x = 50 + x * (brick_width + brick_padding),
-            y = 100 + y * (brick_height + brick_padding),
-            lives = lives,
-        }
-        bricks.push(brick)
+fn reset() {
+    paddle = Paddle {
+        x = screen_width / 2 - paddle_width / 2,
+        y = screen_height - paddle_height / 2 - 50,
+        width = 100,
+        height = 20,
     }
+    
+    ball = Ball { 
+        x = paddle.x + paddle.width / 2,
+        y = paddle.y - 20,
+        speed_x = 5,
+        speed_y = -5,
+        radius = 10,
+    }
+
+    game_speed = 50
+    is_started = false
 }
+
+fn restart() {
+    // setup bricks
+    bricks = []
+    for x in 0..6 {
+        for y in 0..5 {
+            mut brick_lives = 1
+            if y % 2 == 0 {
+                brick_lives = 2
+            }
+            var brick = Brick {
+                x = 50 + x * (brick_width + brick_padding),
+                y = 100 + y * (brick_height + brick_padding),
+                lives = brick_lives,
+            }
+            bricks.push(brick)
+        }
+    }
+
+    lives = start_lives
+    reset()
+}
+restart()
 
 // https://stackoverflow.com/a/45373126/802826
 fn handle_ball_collision(x Num, y Num, width Num, height Num) {
@@ -117,32 +136,32 @@ fn ball_collision(x Num, y Num, width Num, height Num) Bool {
     var is_inside_height =  ball_bottom >= y and ball_top <= y + height
 
     if ball_top <= bottom and ball_top > bottom + ball.speed_y and is_inside_width and ball.speed_y < 0 {
-        // Hit from below
-        handle_ball_collision(x, y, width, height)
+        handle_ball_collision(x, y, width, height) // Hit from below
         return true
     } else if ball_bottom >= y and ball_bottom < y + ball.speed_y and is_inside_width and ball.speed_y > 0 {
-        // Hit from above
-        handle_ball_collision(x, y, width, height)
+        handle_ball_collision(x, y, width, height) // Hit from above
         return true
     } else if ball_right >= x and ball_right < x + ball.speed_x and is_inside_height and ball.speed_x > 0 {
-        // Hit from left
-        handle_ball_collision(x, y, width, height)
+        handle_ball_collision(x, y, width, height) // Hit from left
         return true
     } else if ball_left <= right and ball_left > right + ball.speed_x and is_inside_height and ball.speed_x < 0 {
-        // Hit from right
-        handle_ball_collision(x, y, width, height)
+        handle_ball_collision(x, y, width, height) // Hit from right
         return true
     }
     return false
 }
 
 fn _update(dt Num) {
-    // background(color_background)
+    if !is_started and mouse_clicked {
+        if lives > 0 {
+            is_started = true
+        } else {
+            restart()
+        }
+    }
+
     color(color_background)
     clear()
-   
-    color(color_primary)
-    text('Score: {score}', screen_width / 2, 20) // TODO: Should be centered
 
     // paddle
     color(color_tertiary)
@@ -154,15 +173,22 @@ fn _update(dt Num) {
     }
     fill_rect(paddle.x, paddle.y, paddle.width, paddle.height)
 
-    // ball
-    ball.x += ball.speed_x * dt * game_speed
-    ball.y += ball.speed_y * dt * game_speed
-    game_speed += dt * 2
-    if ball.x <= 0 or ball.x + ball.radius >= screen_width {
-        ball.speed_x = -ball.speed_x
-    }
-    if ball.y <= 0 or ball.y + ball.radius >= screen_height {
-        ball.speed_y = -ball.speed_y
+    if is_started {
+        // ball
+        ball.x += ball.speed_x * dt * game_speed
+        ball.y += ball.speed_y * dt * game_speed
+        game_speed += dt * 2
+        if ball.x <= 0 or ball.x + ball.radius >= screen_width {
+            ball.speed_x = -ball.speed_x
+        }
+        if ball.y <= 0 {
+            ball.speed_y = -ball.speed_y
+        } else if ball.y + ball.radius >= screen_height {
+            lives -= 1
+            reset()
+        }
+    } else {
+        ball.x = paddle.x + paddle.width / 2
     }
     color(color_primary)
     fill_circle(ball.x, ball.y, ball.radius)
@@ -183,7 +209,7 @@ fn _update(dt Num) {
             if brick.lives <= 0 {
                 score += 1
             }
-        } else {
+        } else brick.lives > 0 {
             if brick.lives == 2 { // TODO: Should be a switch/match statement
                 color(color_tertiary)
             } else {
@@ -191,5 +217,11 @@ fn _update(dt Num) {
             }
             fill_rect(brick.x, brick.y, brick_width, brick_height)
         }
+    }
+
+    color(color_primary)
+    text('Lives: {lives}, Score: {score}', screen_width / 2, 40)
+    if lives <= 0 {
+        text('Game Over!', screen_width / 2, screen_height / 2)
     }
 }
