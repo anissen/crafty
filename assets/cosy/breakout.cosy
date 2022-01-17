@@ -136,14 +136,13 @@ fn ball_collision(x Num, y Num, width Num, height Num) Bool {
     return false
 }
 
-fn _update(dt Num) { // TODO: Should include a delta time
+fn _update(dt Num) {
     // background(color_background)
     color(color_background)
     clear()
    
     color(color_primary)
-    text('Cosy Breakout! Score: {score}', 50, 20) // TODO: Should be centered
-    // text('Game speed: {game_speed}', 50, 50) // TODO: Should be centered
+    text('Score: {score}', screen_width / 2, 20) // TODO: Should be centered
 
     // paddle
     color(color_tertiary)

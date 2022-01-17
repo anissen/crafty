@@ -3,6 +3,17 @@ package;
 import kha.Assets;
 import kha.System;
 
+enum TextAlign {
+    Left;
+    Center;
+    Right;
+}
+enum TextVAlign {
+    Top;
+    Middle;
+    Bottom;
+}
+
 class Game {
     public var backbuffer: kha.Image;
     var compiler: cosy.Compiler;
@@ -12,6 +23,8 @@ class Game {
     var needsToRunSetup = false;
 
     var time: Float;
+    var textAlign = Center;
+    var textVAlign = Middle;
 
     public function new(backbuffer: kha.Image) {
         compiler = cosy.Cosy.createCompiler();
@@ -46,11 +59,46 @@ class Game {
         });
         
         compiler.setFunction('text', (args) -> { 
-            var text = (args[0]: String);
+            final text = (args[0]: String);
             var x = (args[1]: Float);
             var y = (args[2]: Float);
+            switch textAlign {
+                case Left: 
+                case Center: x -= backbuffer.g2.font.width(backbuffer.g2.fontSize, text) / 2;
+                case Right:  x -= backbuffer.g2.font.width(backbuffer.g2.fontSize, text);
+            }
+            switch textVAlign {
+                case Top:    y -= backbuffer.g2.font.height(backbuffer.g2.fontSize) / 2;
+                case Middle: 
+                case Bottom: y += backbuffer.g2.font.height(backbuffer.g2.fontSize) / 2;
+            }
             backbuffer.g2.drawString(text, x, y);
             return 0;
+        });
+        compiler.setFunction('text_align', (args) -> { 
+            textAlign = switch (args[0]: String) {
+                case 'left': Left;
+                case 'center': Center;
+                case 'right': Right;
+                case _: Center;
+            };
+            return 0;
+        });
+        compiler.setFunction('text_valign', (args) -> { 
+            textVAlign = switch (args[0]: String) {
+                case 'top': Top;
+                case 'middle': Middle;
+                case 'bottom': Bottom;
+                case _: Middle;
+            };
+            return 0;
+        });
+        compiler.setFunction('text_width', (args) -> { 
+            final text = (args[0]: String);
+            return backbuffer.g2.font.width(backbuffer.g2.fontSize, text);
+        });
+        compiler.setFunction('text_height', (args) -> { 
+            return backbuffer.g2.font.height(backbuffer.g2.fontSize);
         });
         compiler.setFunction('line', (args) -> { 
             var x1 = (args[0]: Float);
