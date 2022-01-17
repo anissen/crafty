@@ -28,6 +28,8 @@ var brick_padding = 20
 var paddle_width = 100
 var paddle_height = 20
 
+mut game_speed = 50
+
 struct Paddle {
     mut x Num
     mut y Num
@@ -98,7 +100,6 @@ fn handle_ball_collision(x Num, y Num, width Num, height Num) {
         ball.speed_x = new_speed_x
         ball.speed_y = new_speed_y
     }
-
     
     // var penetrationDepth = ball.radius - dist.mag()
     // var penetrationVector = dist.normalise().mult(penetrationDepth)
@@ -117,35 +118,32 @@ fn ball_collision(x Num, y Num, width Num, height Num) Bool {
 
     if ball_top <= bottom and ball_top > bottom + ball.speed_y and is_inside_width and ball.speed_y < 0 {
         // Hit from below
-        // ball.speed_y *= -1
         handle_ball_collision(x, y, width, height)
         return true
     } else if ball_bottom >= y and ball_bottom < y + ball.speed_y and is_inside_width and ball.speed_y > 0 {
         // Hit from above
-        // ball.speed_y *= -1
         handle_ball_collision(x, y, width, height)
         return true
     } else if ball_right >= x and ball_right < x + ball.speed_x and is_inside_height and ball.speed_x > 0 {
         // Hit from left
-        // ball.speed_x *= -1
         handle_ball_collision(x, y, width, height)
         return true
     } else if ball_left <= right and ball_left > right + ball.speed_x and is_inside_height and ball.speed_x < 0 {
         // Hit from right
-        // ball.speed_x *= -1
         handle_ball_collision(x, y, width, height)
         return true
     }
     return false
 }
 
-fn _update() { // TODO: Should include a delta time
+fn _update(dt Num) { // TODO: Should include a delta time
     // background(color_background)
     color(color_background)
     clear()
    
     color(color_primary)
     text('Cosy Breakout! Score: {score}', 50, 20) // TODO: Should be centered
+    // text('Game speed: {game_speed}', 50, 50) // TODO: Should be centered
 
     // paddle
     color(color_tertiary)
@@ -158,8 +156,9 @@ fn _update() { // TODO: Should include a delta time
     fill_rect(paddle.x, paddle.y, paddle.width, paddle.height)
 
     // ball
-    ball.x += ball.speed_x
-    ball.y += ball.speed_y
+    ball.x += ball.speed_x * dt * game_speed
+    ball.y += ball.speed_y * dt * game_speed
+    game_speed += dt * 2
     if ball.x <= 0 or ball.x + ball.radius >= screen_width {
         ball.speed_x = -ball.speed_x
     }

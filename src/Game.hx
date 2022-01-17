@@ -11,6 +11,8 @@ class Game {
 
     var needsToRunSetup = false;
 
+    var time: Float;
+
     public function new(backbuffer: kha.Image) {
         compiler = cosy.Cosy.createCompiler();
         this.backbuffer = backbuffer;
@@ -92,6 +94,8 @@ class Game {
         });
 
         reloadScript();
+
+        time = System.time;
     }
 
     public function mouseMove(x: Float, y: Float, moveX: Float, moveY: Float): Void {
@@ -127,7 +131,9 @@ class Game {
             compiler.runStatements(statements);
             needsToRunSetup = false;
         }
-        compiler.runFunction('_update'); // the underscore is a hack to avoid flagging the function as unused
+        final dt = System.time - time;
+        time = System.time;
+        compiler.runFunction('_update', dt); // the underscore is a hack to avoid flagging the function as unused
 
         if (errors.length > 0) {
             g2.color = kha.Color.Black;
