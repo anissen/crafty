@@ -102,29 +102,6 @@ fn restart() {
 }
 restart()
 
-// https://stackoverflow.com/a/45373126/802826
-fn handle_ball_collision(x Num, y Num, width Num, height Num) {
-    var nearest_x = max(x, min(ball.x, x + width))
-    var nearest_y = max(y, min(ball.y, y + height))    
-    var dist_x = (ball.x - nearest_x)
-    var dist_y = (ball.y - nearest_y)
-
-    if (ball.speed_x * dist_x + ball.speed_y * dist_y < 0) { // if ball is moving toward the rect
-        var normal_angle = atan2(dist_x, -dist_y)
-        var incoming_angle = atan2(ball.speed_y, ball.speed_x)
-        var theta = normal_angle - incoming_angle
-
-        var new_speed_x = ball.speed_x * cos(2 * theta) - ball.speed_y * sin(2 * theta)
-        var new_speed_y = ball.speed_x * sin(2 * theta) + ball.speed_y * cos(2 * theta)
-        ball.speed_x = new_speed_x
-        ball.speed_y = new_speed_y
-    }
-    
-    // var penetrationDepth = ball.radius - dist.mag()
-    // var penetrationVector = dist.normalise().mult(penetrationDepth)
-    // ball.pos = ball.sub(penetrationVector)
-}
-
 fn ball_collision(x Num, y Num, width Num, height Num) Bool {
     var ball_top = ball.y - ball.radius
     var ball_bottom = ball.y + ball.radius
@@ -134,21 +111,28 @@ fn ball_collision(x Num, y Num, width Num, height Num) Bool {
     var right = x + width
     var is_inside_width = ball_right >= x and ball_left <= x + width
     var is_inside_height =  ball_bottom >= y and ball_top <= y + height
+    var collision = (ball_top <= bottom and ball_top > bottom + ball.speed_y and is_inside_width and ball.speed_y < 0) or // Hit from below
+    (ball_bottom >= y and ball_bottom < y + ball.speed_y and is_inside_width and ball.speed_y > 0) or // Hit from above
+    (ball_right >= x and ball_right < x + ball.speed_x and is_inside_height and ball.speed_x > 0) or // Hit from left
+    (ball_left <= right and ball_left > right + ball.speed_x and is_inside_height and ball.speed_x < 0) // Hit from right
 
-    if ball_top <= bottom and ball_top > bottom + ball.speed_y and is_inside_width and ball.speed_y < 0 {
-        handle_ball_collision(x, y, width, height) // Hit from below
-        return true
-    } else if ball_bottom >= y and ball_bottom < y + ball.speed_y and is_inside_width and ball.speed_y > 0 {
-        handle_ball_collision(x, y, width, height) // Hit from above
-        return true
-    } else if ball_right >= x and ball_right < x + ball.speed_x and is_inside_height and ball.speed_x > 0 {
-        handle_ball_collision(x, y, width, height) // Hit from left
-        return true
-    } else if ball_left <= right and ball_left > right + ball.speed_x and is_inside_height and ball.speed_x < 0 {
-        handle_ball_collision(x, y, width, height) // Hit from right
-        return true
+    if collision {
+        // https://stackoverflow.com/a/45373126/802826
+        var nearest_x = max(x, min(ball.x, x + width))
+        var nearest_y = max(y, min(ball.y, y + height))
+        var dist_x = (ball.x - nearest_x)
+        var dist_y = (ball.y - nearest_y)
+
+        var normal_angle = atan2(dist_x, -dist_y)
+        var incoming_angle = atan2(ball.speed_y, ball.speed_x)
+        var theta = normal_angle - incoming_angle
+
+        var new_speed_x = ball.speed_x * cos(2 * theta) - ball.speed_y * sin(2 * theta)
+        var new_speed_y = ball.speed_x * sin(2 * theta) + ball.speed_y * cos(2 * theta)
+        ball.speed_x = new_speed_x
+        ball.speed_y = new_speed_y
     }
-    return false
+    return collision
 }
 
 fn _update(dt Num) {
@@ -193,10 +177,8 @@ fn _update(dt Num) {
     color(color_primary)
     fill_circle(ball.x, ball.y, ball.radius)
 
-    if ball_collision(paddle.x, paddle.y, paddle.width, paddle.height) {
-        // TODO: Should probably just rotate the speed vectors instead of overwriting them (which may even slow the ball)
-        ball.speed_x = (ball.x - (paddle.x + paddle.width / 2)) / (paddle.width / 2) * 5
-    }
+    // resolve ball collision with paddle
+    ball_collision(paddle.x, paddle.y, paddle.width, paddle.height)
     
     // bricks
     for brick in bricks {
