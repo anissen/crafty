@@ -58,7 +58,7 @@ class Main {
 
     static function watchFile() {
         #if sys
-        final file = haxe.io.Path.join([Sys.getCwd(), 'test.cosy']);
+        final file = haxe.io.Path.join([Sys.getCwd(), 'assets/cosy/breakout.cosy']);
         trace('Watching $file');
         var stat = sys.FileSystem.stat(file);
         function has_file_changed(): Bool {
@@ -74,12 +74,12 @@ class Main {
                 var time = Date.now();
                 var text = '> "$file" changed at $time';
                 Sys.println('\033[1;34m$text\033[0m');
-                // compiler.runFile(file);
                 
-                game.reloadScript();
+                final script = sys.io.File.getContent('assets/cosy/breakout.cosy');
+                game.reloadScript(script);
             }
         }
-        var timer = new haxe.Timer(1000);
+        var timer = new haxe.Timer(100);
         timer.run = watch_file;
         #end
     }
@@ -96,6 +96,8 @@ class Main {
                 backbuffer = kha.Image.createRenderTarget(screenWidth, screenHeight);
 
                 game = new Game(backbuffer);
+                final script = Assets.blobs.get('breakout_cosy').toString();
+                game.reloadScript(script);
 
                 Scheduler.addTimeTask(function () { update(); }, 0, 1 / 60);
                 System.notifyOnFrames(function (frames) { render(frames); });

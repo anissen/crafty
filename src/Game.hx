@@ -142,8 +142,28 @@ class Game {
             }
             return 0;
         });
-
-        reloadScript();
+        // compiler.setFunction('push_translation', (args) -> { 
+        //     var x = (args[0]: Float);
+        //     var y = (args[1]: Float);
+        //     backbuffer.g2.pushTranslation(x, y);
+        //     return 0;
+        // });
+        // compiler.setFunction('pop_translation', (args) -> { 
+        //     backbuffer.g2.popTransformation();
+        //     return 0;
+        // });
+        // compiler.setFunction('translate', (args) -> { 
+        //     var x = (args[0]: Float);
+        //     var y = (args[1]: Float);
+        //     backbuffer.g2.translate(x, y);
+        //     return 0;
+        // });
+        // compiler.setFunction('screen_shake', (args) -> { 
+        //     var x = (args[0]: Float);
+        //     var y = (args[1]: Float);
+        //     backbuffer.g2.translate(x, y);
+        //     return 0;
+        // });
 
         time = System.time;
     }
@@ -165,9 +185,10 @@ class Game {
         return statements != null;
     }
 
-    public function reloadScript() {
-        final script = Assets.blobs.breakout_cosy.toString();
+    public function reloadScript(script: String) {
+        // final script = Assets.blobs.breakout_cosy.toString();
         // final script = Assets.blobs.follow_cosy.toString();
+        // final script = Assets.blobs.get('breakout_cosy').toString();
         statements = compiler.parse(script);
         errors = (isScriptValid() ? [] : ['Script error(s)']);
         
