@@ -3,6 +3,7 @@ foreign fn fill_rect(x Num, y Num, width Num, height Num) Void
 foreign fn fill_circle(x Num, y Num, radius Num) Void
 foreign fn clear() Void
 foreign fn color(c Str) Void
+foreign fn play_sound(name Str) Void
 
 foreign fn max(a Num, b Num) Num
 foreign fn min(a Num, b Num) Num
@@ -164,9 +165,11 @@ fn _update(dt Num) {
         game_speed += dt * 2
         if ball.x <= 0 or ball.x + ball.radius >= screen_width {
             ball.speed_x = -ball.speed_x
+            play_sound('bump2')
         }
         if ball.y <= 0 {
             ball.speed_y = -ball.speed_y
+            play_sound('bump2')
         } else if ball.y + ball.radius >= screen_height {
             lives -= 1
             reset()
@@ -178,7 +181,9 @@ fn _update(dt Num) {
     fill_circle(ball.x, ball.y, ball.radius)
 
     // resolve ball collision with paddle
-    ball_collision(paddle.x, paddle.y, paddle.width, paddle.height)
+    if ball_collision(paddle.x, paddle.y, paddle.width, paddle.height) {
+        play_sound('bump2')
+    }
     
     // bricks
     for brick in bricks {
@@ -187,6 +192,7 @@ fn _update(dt Num) {
         }
 
         if ball_collision(brick.x, brick.y, brick_width, brick_height) {
+            play_sound('bump')
             brick.lives -= 1
             if brick.lives <= 0 {
                 score += 1

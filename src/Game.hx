@@ -142,6 +142,11 @@ class Game {
             }
             return 0;
         });
+        compiler.setFunction('play_sound', (args) -> { 
+            final name = (args[0]: String);
+            kha.audio1.Audio.play(Assets.sounds.get(name));
+            return 0;
+        });
         // compiler.setFunction('push_translation', (args) -> { 
         //     var x = (args[0]: Float);
         //     var y = (args[1]: Float);
