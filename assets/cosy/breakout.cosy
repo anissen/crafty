@@ -99,6 +99,7 @@ fn restart() {
     }
 
     lives = start_lives
+    score = 0
     reset()
 }
 restart()

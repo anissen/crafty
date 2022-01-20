@@ -20,8 +20,6 @@ class Game {
     var statements: Array<cosy.Stmt> = [];
     var errors: Array<String> = [];
 
-    var needsToRunSetup = false;
-
     var time: Float;
     var textAlign = Center;
     var textVAlign = Middle;
@@ -115,7 +113,6 @@ class Game {
             var y      = (args[1]: Float);
             var radius = (args[2]: Float);
             var segments = Std.int(6 + Math.sqrt(radius) * 2);
-            // trace(segments);
             var angle_per_segment = (Math.PI * 2) / segments;
             for (i in 0...segments) {
                 var x1 = x + radius * Math.cos(angle_per_segment * i);
@@ -191,13 +188,10 @@ class Game {
     }
 
     public function reloadScript(script: String) {
-        // final script = Assets.blobs.breakout_cosy.toString();
-        // final script = Assets.blobs.follow_cosy.toString();
-        // final script = Assets.blobs.get('breakout_cosy').toString();
         statements = compiler.parse(script);
         errors = (isScriptValid() ? [] : ['Script error(s)']);
-        
-        needsToRunSetup = true;
+
+        compiler.runStatements(statements);
     }
         
     public function update(): Void {
@@ -213,10 +207,6 @@ class Game {
         compiler.setVariable('time', System.time);
         compiler.setVariable('mouse_clicked', mouseClicked);
         mouseClicked = false;
-        if (needsToRunSetup) {
-            compiler.runStatements(statements);
-            needsToRunSetup = false;
-        }
         final dt = System.time - time;
         time = System.time;
         compiler.runFunction('_update', dt); // the underscore is a hack to avoid flagging the function as unused
