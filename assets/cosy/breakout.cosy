@@ -52,13 +52,13 @@ struct Brick {
     var y Num
     mut lives Num = 1
 }
-mut bricks Array Brick = []
+mut bricks Array Brick
 
 var start_lives = 3
-mut lives = start_lives
-mut game_speed = 50
-mut score = 0
-mut is_started = false
+mut lives
+mut game_speed
+mut score
+mut is_started
 
 fn reset() {
     paddle = Paddle {
@@ -102,7 +102,7 @@ fn restart() {
     score = 0
     reset()
 }
-restart()
+// restart()
 
 fn ball_collision(x Num, y Num, width Num, height Num) Bool {
     var ball_top = ball.y - ball.radius

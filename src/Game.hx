@@ -187,11 +187,17 @@ class Game {
         return statements != null;
     }
 
-    public function reloadScript(script: String) {
+    public function reloadScript(script: String, hotReload = false) {
         statements = compiler.parse(script);
         errors = (isScriptValid() ? [] : ['Script error(s)']);
 
+        compiler.runStatements(statements, hotReload);
+        if (!hotReload) compiler.runFunction('restart');
+    }
+
+    public function restart() {
         compiler.runStatements(statements);
+        compiler.runFunction('restart');
     }
         
     public function update(): Void {

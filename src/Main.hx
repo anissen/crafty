@@ -32,6 +32,8 @@ class Main {
     static function keyDown(key: kha.input.KeyCode) {
         if (key == kha.input.KeyCode.Escape) {
             System.stop();
+        } else if (key == kha.input.KeyCode.R) {
+            game.restart();
         }
     }
 
@@ -58,7 +60,9 @@ class Main {
 
     static function watchFile() {
         #if sys
-        final file = haxe.io.Path.join([Sys.getCwd(), 'assets/cosy/breakout.cosy']);
+        // trace('working directory is: ' + Sys.getCwd());
+        final programDir = haxe.io.Path.directory(Sys.programPath());
+        final file = haxe.io.Path.join([programDir, '../../..', 'assets/cosy/breakout.cosy']);
         trace('Watching $file');
         var stat = sys.FileSystem.stat(file);
         function has_file_changed(): Bool {
@@ -75,8 +79,8 @@ class Main {
                 var text = '> "$file" changed at $time';
                 Sys.println('\033[1;34m$text\033[0m');
                 
-                final script = sys.io.File.getContent('assets/cosy/breakout.cosy');
-                game.reloadScript(script);
+                final script = sys.io.File.getContent(file);
+                game.reloadScript(script, true);
             }
         }
         var timer = new haxe.Timer(100);
