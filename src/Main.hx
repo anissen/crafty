@@ -90,13 +90,26 @@ class Main {
         #end
     }
 
-    public static function main() {
-        setFullWindowCanvas();
+    static function main() {
+        setFullWindowCanvas(); 
 
-        System.start({title: "Cosy Breakout", width: screenWidth, height: screenHeight}, function (_) {
+        // var dpiAwareDisplayWidth = Std.int(screenWidth * kha.Display.primary.pixelsPerInch / 48);
+        // var dpiAwareDisplayHeight = Std.int(screenHeight * kha.Display.primary.pixelsPerInch / 48);
+        // trace('width: $dpiAwareDisplayWidth, height: $dpiAwareDisplayHeight');
+        // System.start({title: "Cosy Breakout", width: dpiAwareDisplayWidth, height: dpiAwareDisplayHeight }, function (_) {
+            // #if js
+			// var canvas = cast(js.Browser.document.getElementById('khanvas'), js.html.CanvasElement);
+			// canvas.width = js.Browser.window.innerWidth;
+			// canvas.height = js.Browser.window.innerHeight;
+			// canvas.addEventListener('contextmenu', function(event) {
+                // 	event.preventDefault();
+                // });
+                // #end
+                
+        System.start({title: "Crafty", width: screenWidth, height: screenHeight }, function (_) {
             // Just loading everything is ok for small projects
             Assets.loadEverything(function () {
-                watchFile(); 
+                watchFile();
 
                 // Avoid passing update/render directly, so replacing them via code injection works
                 backbuffer = kha.Image.createRenderTarget(screenWidth, screenHeight);
