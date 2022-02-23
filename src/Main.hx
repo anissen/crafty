@@ -60,11 +60,11 @@ class Main {
         #end
     }
 
-    static function watchFile() {
+    static function watchFile(fileName: String) {
         #if sys
         // trace('working directory is: ' + Sys.getCwd());
         final programDir = haxe.io.Path.directory(Sys.programPath());
-        final file = haxe.io.Path.join([programDir, '../../..', 'assets/cosy/flappy.cosy']);
+        final file = haxe.io.Path.join([programDir, '../../..', 'assets/cosy', fileName]);
         trace('Watching $file');
         var stat = sys.FileSystem.stat(file);
         function has_file_changed(): Bool {
@@ -82,7 +82,7 @@ class Main {
                 Sys.println('\033[1;34m$text\033[0m');
                 
                 final script = sys.io.File.getContent(file);
-                game.reloadScript(script, true);
+                game.reloadScript(fileName, script, true);
             }
         }
         var timer = new haxe.Timer(100);
@@ -109,13 +109,13 @@ class Main {
         System.start({title: "Crafty", width: screenWidth, height: screenHeight }, function (_) {
             // Just loading everything is ok for small projects
             Assets.loadEverything(function () {
-                watchFile();
+                final fileName = 'select.cosy';
+                watchFile(fileName);
 
                 // Avoid passing update/render directly, so replacing them via code injection works
                 backbuffer = kha.Image.createRenderTarget(screenWidth, screenHeight);
 
                 game = new Game(backbuffer);
-                final fileName = 'select.cosy';
                 #if sys
                 final programDir = haxe.io.Path.directory(Sys.programPath());
                 final file = haxe.io.Path.join([programDir, '../../..', 'assets/cosy', fileName]);

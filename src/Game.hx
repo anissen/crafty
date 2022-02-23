@@ -233,11 +233,14 @@ class Game {
         if (!isScriptValid()) return;
         if (!hotReload) compiler.runFunction('restart');
         if (!isScriptValid()) return;
+        error_index = 0;
     }
 
     public function restart() {
         compiler.runStatements(statements);
+        if (!isScriptValid()) return;
         compiler.runFunction('restart');
+        if (!isScriptValid()) return;
     }
         
     public function update(): Void {
