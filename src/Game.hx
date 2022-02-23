@@ -22,6 +22,7 @@ class Game {
     var fileName = '';
     var script = '';
     var errors: Array<String> = [];
+    var error_index = 0;
 
     var time: Float;
     var textAlign = Center;
@@ -208,8 +209,8 @@ class Game {
         // compiler.setVariable('key_' + key.toString(), true);
         if (errors.length > 0) {
             switch key {
-                case KeyCode.Up | KeyCode.Left: error_id--;
-                case KeyCode.Right | KeyCode.Down: error_id++;
+                case KeyCode.Up | KeyCode.Left: error_index--;
+                case KeyCode.Right | KeyCode.Down: error_index++;
                 case _:
             }
         }
@@ -243,7 +244,6 @@ class Game {
         // ...
     }
 
-    var error_id = 0;
     public function render(): Void {
         var g2 = backbuffer.g2;
         g2.begin(false);
@@ -260,30 +260,32 @@ class Game {
             isScriptValid();
         }
         if (errors.length > 0) {
-            if (error_id < 0) error_id = 0;
-            else if (error_id > errors.length - 1) error_id = errors.length - 1;
-
-            g2.clear(kha.Color.White);
-            // g2.color = kha.Color.Black;
-            // g2.fillRect(0, 0, backbuffer.width, error_scroll);
-            
-            g2.color = kha.Color.Orange;
-            g2.fillRect(0, 0, backbuffer.width, 100);
-
-            g2.color = kha.Color.White;
-            g2.font = Assets.fonts.brass_mono_regular;
-            g2.fontSize = 48;
-            g2.drawString('${error_id + 1}/${errors.length} errors in ${fileName}', 30, 30);
-            
-            g2.color = kha.Color.Black;
-            g2.fontSize = 24;
-            var y = 150.0;
-            for (line in errors[error_id].split('\n')) {
-                g2.drawString(line, 20, y);
-                y += g2.font.height(backbuffer.g2.fontSize) + 5;
-            }
+            renderErrors(g2); 
         }
 
         g2.end();
+    }
+
+    function renderErrors(g2: kha.graphics2.Graphics) {
+        if (error_index < 0) error_index = 0;
+        else if (error_index > errors.length - 1) error_index = errors.length - 1;
+
+        g2.clear(kha.Color.White);
+        
+        g2.color = kha.Color.Orange;
+        g2.fillRect(0, 0, backbuffer.width, 100);
+
+        g2.color = kha.Color.White;
+        g2.font = Assets.fonts.brass_mono_regular;
+        g2.fontSize = 48;
+        g2.drawString('${error_index + 1}/${errors.length} errors in ${fileName}', 30, 30);
+        
+        g2.color = kha.Color.Black;
+        g2.fontSize = 24;
+        var y = 150.0;
+        for (line in errors[error_index].split('\n')) {
+            g2.drawString(line, 20, y);
+            y += g2.font.height(backbuffer.g2.fontSize) + 5;
+        }
     }
 }
