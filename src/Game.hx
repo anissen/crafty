@@ -1,5 +1,6 @@
 package;
 
+import kha.input.KeyCode;
 import kha.Assets;
 import kha.System;
 
@@ -18,6 +19,8 @@ class Game {
     public var backbuffer: kha.Image;
     var compiler: cosy.Compiler;
     var statements: Array<cosy.Stmt> = [];
+    var fileName = '';
+    var script = '';
     var errors: Array<String> = [];
 
     var time: Float;
@@ -28,6 +31,22 @@ class Game {
     public function new(backbuffer: kha.Image) {
         compiler = cosy.Cosy.createCompiler();
         this.backbuffer = backbuffer;
+
+        #if sys
+        final programDir = haxe.io.Path.directory(Sys.programPath());
+        final workingDir = haxe.io.Path.join([programDir, '../../..']);
+        final gamesDir = haxe.io.Path.join([workingDir, 'games']);
+        trace('gamesDir: $gamesDir');
+        final games = sys.FileSystem.readDirectory(gamesDir).map(file -> {
+            if (sys.FileSystem.isDirectory(haxe.io.Path.join([gamesDir, file]))) {
+                return file;
+            }
+            return null;
+        }).filter(file -> file != null);
+        compiler.setVariable('games', games);
+        #else
+        compiler.setVariable('games', ['dummy game 1', 'dummy game 2']);
+        #end
 
         compiler.setVariable('time', System.time);
         compiler.setVariable('mouse_clicked', false);
@@ -176,23 +195,43 @@ class Game {
     }
     
     public function mouseDown(button: Int, x: Int, y: Int): Void {
+        // mouseX = Scaler.transformX(x, y, backbuffer, ScreenCanvas.the, System.screenRotation);
+		// mouseY = Scaler.transformY(x, y, backbuffer, ScreenCanvas.the, System.screenRotation);
         mouseClicked = true;
     }
     
     public function mouseUp(button: Int, x: Int, y: Int): Void {
         
     }
-
+    
+	public function keyDown(key:KeyCode) {
+        // compiler.setVariable('key_' + key.toString(), true);
+        if (errors.length > 0) {
+            switch key {
+                case KeyCode.Up | KeyCode.Left: error_id--;
+                case KeyCode.Right | KeyCode.Down: error_id++;
+                case _:
+            }
+        }
+    }
+    
     function isScriptValid() {
-        return statements != null;
+        errors = compiler.logger.log.map(error -> cosy.Logging.getReport(fileName, script, error));
+        return compiler.logger.hadError || compiler.logger.hadRuntimeError || statements != null;
     }
 
-    public function reloadScript(script: String, hotReload = false) {
+    public function reloadScript(fileName: String, script: String, hotReload = false) {
+        this.fileName = fileName;
+        this.script = script;
         statements = compiler.parse(script);
-        errors = (isScriptValid() ? [] : ['Script error(s)']);
-
+        if (!isScriptValid()) return;
+        
+        // TODO: Register a callback for runtime errors
+        
         compiler.runStatements(statements, hotReload);
+        if (!isScriptValid()) return;
         if (!hotReload) compiler.runFunction('restart');
+        if (!isScriptValid()) return;
     }
 
     public function restart() {
@@ -204,6 +243,7 @@ class Game {
         // ...
     }
 
+    var error_id = 0;
     public function render(): Void {
         var g2 = backbuffer.g2;
         g2.begin(false);
@@ -215,15 +255,33 @@ class Game {
         mouseClicked = false;
         final dt = System.time - time;
         time = System.time;
-        compiler.runFunction('_update', dt); // the underscore is a hack to avoid flagging the function as unused
-
+        if (errors.length == 0) {
+            compiler.runFunction('_update', dt); // the underscore is a hack to avoid flagging the function as unused
+            isScriptValid();
+        }
         if (errors.length > 0) {
-            g2.color = kha.Color.Black;
-            g2.fillRect(0, 0, backbuffer.width, backbuffer.height / 2);
+            if (error_id < 0) error_id = 0;
+            else if (error_id > errors.length - 1) error_id = errors.length - 1;
 
-            g2.color = kha.Color.Red;
+            g2.clear(kha.Color.White);
+            // g2.color = kha.Color.Black;
+            // g2.fillRect(0, 0, backbuffer.width, error_scroll);
+            
+            g2.color = kha.Color.Orange;
+            g2.fillRect(0, 0, backbuffer.width, 100);
+
+            g2.color = kha.Color.White;
+            g2.font = Assets.fonts.brass_mono_regular;
+            g2.fontSize = 48;
+            g2.drawString('${error_id + 1}/${errors.length} errors in ${fileName}', 30, 30);
+            
+            g2.color = kha.Color.Black;
             g2.fontSize = 24;
-            g2.drawString(errors.join('\n'), 10, 10);
+            var y = 150.0;
+            for (line in errors[error_id].split('\n')) {
+                g2.drawString(line, 20, y);
+                y += g2.font.height(backbuffer.g2.fontSize) + 5;
+            }
         }
 
         g2.end();

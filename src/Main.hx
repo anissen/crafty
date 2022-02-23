@@ -34,6 +34,8 @@ class Main {
             System.stop();
         } else if (key == kha.input.KeyCode.R) {
             game.restart();
+        } else {
+            game.keyDown(key);
         }
     }
 
@@ -100,14 +102,15 @@ class Main {
                 backbuffer = kha.Image.createRenderTarget(screenWidth, screenHeight);
 
                 game = new Game(backbuffer);
+                final fileName = 'select.cosy';
                 #if sys
                 final programDir = haxe.io.Path.directory(Sys.programPath());
-                final file = haxe.io.Path.join([programDir, '../../..', 'assets/cosy/flappy.cosy']);
+                final file = haxe.io.Path.join([programDir, '../../..', 'assets/cosy', fileName]);
                 final script = sys.io.File.getContent(file);
                 #else
-                final script = Assets.blobs.get('breakout_cosy').toString();
+                final script = Assets.blobs.get(StringTools.replace(fileName, '.', '_')).toString();
                 #end
-                game.reloadScript(script);
+                game.reloadScript(fileName, script);
 
                 Scheduler.addTimeTask(function () { update(); }, 0, 1 / 60);
                 System.notifyOnFrames(function (frames) { render(frames); });
