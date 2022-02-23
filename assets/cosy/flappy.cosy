@@ -1,0 +1,128 @@
+foreign fn text(str Str, x Num, y Num) Void
+foreign fn fill_rect(x Num, y Num, width Num, height Num) Void
+// foreign fn fill_circle(x Num, y Num, radius Num) Void
+foreign fn clear() Void
+foreign fn color(c Str) Void
+foreign fn play_sound(name Str) Void
+
+foreign fn random(v Num) Num
+// foreign fn max(a Num, b Num) Num
+// foreign fn min(a Num, b Num) Num
+// foreign fn atan2(a Num, b Num) Num
+// foreign fn cos(v Num) Num
+// foreign fn sin(v Num) Num
+
+// foreign var mouse_x Num // TODO: Should use keyboard input instead
+foreign var mouse_clicked Bool // TODO: Should use keyboard input instead
+
+// colors from here: https://lospec.com/palette-list/bluedream4
+var color_background = '#ecf2cb'
+var color_primary = '#1f285d'
+var color_secondary = '#4b849a'
+var color_tertiary = '#98d8b1'
+
+var screen_width = 800
+var screen_height = 600
+
+mut score = 0
+mut obstruction_countdown = 0
+
+struct Obstruction {
+    mut x Num
+    mut hole_y Num
+    mut hole_height Num
+    mut cleared Bool = false
+}
+mut obstructions Array Obstruction = []
+
+struct Player {
+    mut x Num
+    mut y Num
+    mut vel_x Num
+    mut vel_y Num
+}
+mut player Player
+
+fn reset() {
+    
+}
+
+fn restart() {
+    score = 0
+    player = Player {
+        x = screen_width / 3,
+        y = screen_height / 2,
+        vel_x = 0,
+        vel_y = 0,
+    }
+    reset()
+}
+restart()
+
+fn _update(dt Num) {
+    color(color_background)
+    clear()
+
+    obstruction_countdown -= dt
+
+    if obstruction_countdown <= 0 {
+        var min_hole_height = 125
+        var hole_height = min_hole_height + 100 * random()
+        obstructions.push(Obstruction {
+            x = screen_width,
+            hole_y = (screen_height - hole_height) * random(),
+            hole_height = hole_height
+        })
+        obstruction_countdown = 2.5 + 1.5 * random()
+    }
+
+    var velocity_factor = 100
+    if mouse_clicked {
+        player.vel_y = -175 * velocity_factor * dt
+    }
+    player.vel_y += 7 * velocity_factor * dt
+    if player.vel_y > 300 {
+        player.vel_y = 300
+    }
+    player.y += player.vel_y * dt
+
+    color(color_tertiary)
+    var player_size = 40
+    fill_rect(player.x, player.y, player_size, player_size)
+
+    mut index = 0
+    for obstruction in obstructions {
+        obstruction.x -= dt * 100
+        
+        if index % 2 == 0 {
+            color(color_primary)
+        } else {
+            color(color_secondary)
+        }
+        
+        // color(color_secondary)
+        var obstruction_width = 100
+        fill_rect(obstruction.x, 0, obstruction_width, obstruction.hole_y)
+        fill_rect(obstruction.x, obstruction.hole_y + obstruction.hole_height, obstruction_width, screen_height)
+        
+        // if obstruction.x < 0 {
+        //     obstructions.remove(obstruction)
+        // }
+
+        if !obstruction.cleared and player.x > obstruction.x + obstruction_width  {
+            obstruction.cleared = true
+            // obstruction.hole_y = screen_height
+            play_sound('bump')
+            score += 1
+        }
+        if obstruction.cleared and obstruction.hole_height > 0 {
+            obstruction.hole_y += 500 * dt
+            obstruction.hole_height -= 1000 * dt
+        }
+
+        index += 1
+    }
+    
+    color(color_tertiary)
+    text('Flappy! Score: {score}', screen_width / 2, 50)
+}

@@ -62,7 +62,7 @@ class Main {
         #if sys
         // trace('working directory is: ' + Sys.getCwd());
         final programDir = haxe.io.Path.directory(Sys.programPath());
-        final file = haxe.io.Path.join([programDir, '../../..', 'assets/cosy/breakout.cosy']);
+        final file = haxe.io.Path.join([programDir, '../../..', 'assets/cosy/flappy.cosy']);
         trace('Watching $file');
         var stat = sys.FileSystem.stat(file);
         function has_file_changed(): Bool {
@@ -100,7 +100,13 @@ class Main {
                 backbuffer = kha.Image.createRenderTarget(screenWidth, screenHeight);
 
                 game = new Game(backbuffer);
+                #if sys
+                final programDir = haxe.io.Path.directory(Sys.programPath());
+                final file = haxe.io.Path.join([programDir, '../../..', 'assets/cosy/flappy.cosy']);
+                final script = sys.io.File.getContent(file);
+                #else
                 final script = Assets.blobs.get('breakout_cosy').toString();
+                #end
                 game.reloadScript(script);
 
                 Scheduler.addTimeTask(function () { update(); }, 0, 1 / 60);
