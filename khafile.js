@@ -1,4 +1,4 @@
-let project = new Project('Cosy Breakout');
+let project = new Project('Crafty');
 
 console.log(`building for ${platform}`);
 
