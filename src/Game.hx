@@ -38,13 +38,17 @@ class Game {
         final workingDir = haxe.io.Path.join([programDir, '../../..']);
         final gamesDir = haxe.io.Path.join([workingDir, 'games']);
         trace('gamesDir: $gamesDir');
-        final games = sys.FileSystem.readDirectory(gamesDir).map(file -> {
-            if (sys.FileSystem.isDirectory(haxe.io.Path.join([gamesDir, file]))) {
-                return file;
-            }
-            return null;
-        }).filter(file -> file != null);
-        compiler.setVariable('games', games);
+        if (sys.FileSystem.exists(gamesDir)) {
+            final games = sys.FileSystem.readDirectory(gamesDir).map(file -> {
+                if (sys.FileSystem.isDirectory(haxe.io.Path.join([gamesDir, file]))) {
+                    return file;
+                }
+                return null;
+            }).filter(file -> file != null);
+            compiler.setVariable('games', games);
+        } else {
+            compiler.setVariable('games', []);
+        }
         #else
         compiler.setVariable('games', ['dummy game 1', 'dummy game 2']);
         #end

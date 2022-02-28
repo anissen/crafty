@@ -60,11 +60,9 @@ class Main {
         #end
     }
 
-    static function watchFile(fileName: String) {
-        #if sys
+    #if sys
+    static function watchFile(file: String) {
         // trace('working directory is: ' + Sys.getCwd());
-        final programDir = haxe.io.Path.directory(Sys.programPath());
-        final file = haxe.io.Path.join([programDir, '../../..', 'assets/cosy', fileName]);
         trace('Watching $file');
         var stat = sys.FileSystem.stat(file);
         function has_file_changed(): Bool {
@@ -81,44 +79,41 @@ class Main {
                 var text = '> "$file" changed at $time';
                 Sys.println('\033[1;34m$text\033[0m');
                 
+                final fileName = haxe.io.Path.withoutDirectory(file);
                 final script = sys.io.File.getContent(file);
                 game.reloadScript(fileName, script, true);
             }
         }
         var timer = new haxe.Timer(100);
         timer.run = watch_file;
-        #end
     }
+    #end
 
     static function main() {
-        setFullWindowCanvas(); 
+        #if sys
+        final programDir = haxe.io.Path.directory(Sys.programPath());
+        final relativeFilePath = (Sys.args().length > 0) ? Sys.args()[0] : 'assets/cosy/select.cosy';
+        final file = haxe.io.Path.join([programDir, '../../..', relativeFilePath]);
+        trace('Running $file');
+        final fileName = haxe.io.Path.withoutDirectory(file);
+        #else
+        final fileName = 'select.cosy'; 
+        #end
 
-        // var dpiAwareDisplayWidth = Std.int(screenWidth * kha.Display.primary.pixelsPerInch / 48);
-        // var dpiAwareDisplayHeight = Std.int(screenHeight * kha.Display.primary.pixelsPerInch / 48);
-        // trace('width: $dpiAwareDisplayWidth, height: $dpiAwareDisplayHeight');
-        // System.start({title: "Cosy Breakout", width: dpiAwareDisplayWidth, height: dpiAwareDisplayHeight }, function (_) {
-            // #if js
-			// var canvas = cast(js.Browser.document.getElementById('khanvas'), js.html.CanvasElement);
-			// canvas.width = js.Browser.window.innerWidth;
-			// canvas.height = js.Browser.window.innerHeight;
-			// canvas.addEventListener('contextmenu', function(event) {
-                // 	event.preventDefault();
-                // });
-                // #end
+        setFullWindowCanvas(); 
                 
         System.start({title: "Crafty", width: screenWidth, height: screenHeight }, function (_) {
             // Just loading everything is ok for small projects
             Assets.loadEverything(function () {
-                final fileName = 'select.cosy';
-                watchFile(fileName);
+                #if sys
+                watchFile(file);
+                #end
 
                 // Avoid passing update/render directly, so replacing them via code injection works
                 backbuffer = kha.Image.createRenderTarget(screenWidth, screenHeight);
 
                 game = new Game(backbuffer);
                 #if sys
-                final programDir = haxe.io.Path.directory(Sys.programPath());
-                final file = haxe.io.Path.join([programDir, '../../..', 'assets/cosy', fileName]);
                 final script = sys.io.File.getContent(file);
                 #else
                 final script = Assets.blobs.get(StringTools.replace(fileName, '.', '_')).toString();
