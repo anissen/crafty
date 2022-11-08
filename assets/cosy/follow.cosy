@@ -4,13 +4,13 @@ foreign fn line(x1 Num, y1 Num, x2 Num, y2 Num) Void
 foreign fn cos(v Num) Num
 foreign fn sin(v Num) Num
 foreign fn atan2(v1 Num, v2 Num) Num
-foreign var mouse_x Num
-foreign var mouse_y Num
+foreign let mouse_x Num
+foreign let mouse_y Num
 
 mut x Array Num = []
 mut y Array Num = []
-var seg_num = 75
-var seg_length = 10
+let seg_num = 75
+let seg_length = 10
 
 for i in 0..seg_num {
     x.push(400 - i * cos(i * 4) * seg_length)
@@ -18,12 +18,12 @@ for i in 0..seg_num {
 }
 
 fn drag_segment(i Num, xin Num, yin Num) {
-    var dx = xin - x[i]
-    var dy = yin - y[i]
-    var angle = atan2(dy, dx)
+    let dx = xin - x[i]
+    let dy = yin - y[i]
+    let angle = atan2(dy, dx)
     x[i] = xin - cos(angle) * seg_length
     y[i] = yin - sin(angle) * seg_length
-    color_rgb(1 - i / seg_num, 0.0, i / seg_num)
+    color_rgb(1 - i / seg_num, 1.0, i / seg_num)
     line(xin, yin, x[i], y[i])
 }
 

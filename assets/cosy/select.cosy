@@ -6,19 +6,19 @@ foreign fn play_sound(name Str) Void
 // foreign fn text_width(str Str) Num
 // foreign fn text_height(str Str) Num
 
-// foreign var mouse_x Num // TODO: Should use keyboard input instead
-foreign var mouse_clicked Bool // TODO: Should use keyboard input instead
+// foreign let mouse_x Num // TODO: Should use keyboard input instead
+foreign let mouse_clicked Bool // TODO: Should use keyboard input instead
 
-foreign var games Array Str
+foreign let games Array Str
 
 // colors from here: https://lospec.com/palette-list/bluedream4
-var color_background = '#ecf2cb'
-var color_primary = '#1f285d'
-var color_secondary = '#4b849a'
-var color_tertiary = '#98d8b1'
+let color_background = '#ecf2cb'
+let color_primary = '#1f285d'
+let color_secondary = '#4b849a'
+let color_tertiary = '#98d8b1'
 
-var screen_width = 800
-var screen_height = 600
+let screen_width = 800
+let screen_height = 600
 
 fn reset() {
     
@@ -34,13 +34,13 @@ fn _update(dt Num) {
     clear()
 
     for i in 0..games.length {
-        var y = 200 + i * 100
+        let y = 200 + i * 100
 
         color(color_secondary)
         fill_rect(100, y, 100 - screen_width - 200, 100)
         
         color(color_primary)
-        var game = games[i]
+        let game = games[i]
         text(game, screen_width / 2, y)
     }
 

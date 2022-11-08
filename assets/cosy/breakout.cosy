@@ -11,30 +11,30 @@ foreign fn atan2(a Num, b Num) Num
 foreign fn cos(v Num) Num
 foreign fn sin(v Num) Num
 
-foreign var mouse_x Num // TODO: Should use keyboard input instead
-foreign var mouse_clicked Bool // TODO: Should use keyboard input instead
+foreign let mouse_x Num // TODO: Should use keyboard input instead
+foreign let mouse_clicked Bool // TODO: Should use keyboard input instead
 
 // colors from here: https://lospec.com/palette-list/bluedream4
-var color_background = '#ecf2cb'
-var color_primary = '#1f285d'
-var color_secondary = '#4b849a'
-var color_tertiary = '#98d8b1'
+let color_background = '#ecf2cb'
+let color_primary = '#1f285d'
+let color_secondary = '#4b849a'
+let color_tertiary = '#98d8b1'
 
-var screen_width = 800
-var screen_height = 600
+let screen_width = 800
+let screen_height = 600
 
-var brick_width = 100
-var brick_height = 50
-var brick_padding = 20
+let brick_width = 100
+let brick_height = 50
+let brick_padding = 20
 
-var paddle_width = 100
-var paddle_height = 20
+let paddle_width = 100
+let paddle_height = 20
 
 struct Paddle {
     mut x Num
     mut y Num
-    var width Num
-    var height Num
+    let width Num
+    let height Num
 }
 mut paddle Paddle
 
@@ -43,18 +43,18 @@ struct Ball {
     mut y Num
     mut speed_x Num
     mut speed_y Num
-    var radius Num
+    let radius Num
 }
 mut ball Ball
 
 struct Brick {
-    var x Num
-    var y Num
+    let x Num
+    let y Num
     mut lives Num = 1
 }
 mut bricks Array Brick
 
-var start_lives = 3
+let start_lives = 3
 mut lives
 mut game_speed
 mut score
@@ -89,7 +89,7 @@ fn restart() {
             if y % 2 == 0 {
                 brick_lives = 2
             }
-            var brick = Brick {
+            let brick = Brick {
                 x = 50 + x * (brick_width + brick_padding),
                 y = 100 + y * (brick_height + brick_padding),
                 lives = brick_lives,
@@ -105,32 +105,32 @@ fn restart() {
 // restart()
 
 fn ball_collision(x Num, y Num, width Num, height Num) Bool {
-    var ball_top = ball.y - ball.radius
-    var ball_bottom = ball.y + ball.radius
-    var ball_right = ball.x + ball.radius
-    var ball_left = ball.x - ball.radius
-    var bottom = y + height
-    var right = x + width
-    var is_inside_width = ball_right >= x and ball_left <= x + width
-    var is_inside_height =  ball_bottom >= y and ball_top <= y + height
-    var collision = (ball_top <= bottom and ball_top > bottom + ball.speed_y and is_inside_width and ball.speed_y < 0) or // Hit from below
+    let ball_top = ball.y - ball.radius
+    let ball_bottom = ball.y + ball.radius
+    let ball_right = ball.x + ball.radius
+    let ball_left = ball.x - ball.radius
+    let bottom = y + height
+    let right = x + width
+    let is_inside_width = ball_right >= x and ball_left <= x + width
+    let is_inside_height =  ball_bottom >= y and ball_top <= y + height
+    let collision = (ball_top <= bottom and ball_top > bottom + ball.speed_y and is_inside_width and ball.speed_y < 0) or // Hit from below
     (ball_bottom >= y and ball_bottom < y + ball.speed_y and is_inside_width and ball.speed_y > 0) or // Hit from above
     (ball_right >= x and ball_right < x + ball.speed_x and is_inside_height and ball.speed_x > 0) or // Hit from left
     (ball_left <= right and ball_left > right + ball.speed_x and is_inside_height and ball.speed_x < 0) // Hit from right
 
     if collision {
         // https://stackoverflow.com/a/45373126/802826
-        var nearest_x = max(x, min(ball.x, x + width))
-        var nearest_y = max(y, min(ball.y, y + height))
-        var dist_x = (ball.x - nearest_x)
-        var dist_y = (ball.y - nearest_y)
+        let nearest_x = max(x, min(ball.x, x + width))
+        let nearest_y = max(y, min(ball.y, y + height))
+        let dist_x = (ball.x - nearest_x)
+        let dist_y = (ball.y - nearest_y)
 
-        var normal_angle = atan2(dist_x, -dist_y)
-        var incoming_angle = atan2(ball.speed_y, ball.speed_x)
-        var theta = normal_angle - incoming_angle
+        let normal_angle = atan2(dist_x, -dist_y)
+        let incoming_angle = atan2(ball.speed_y, ball.speed_x)
+        let theta = normal_angle - incoming_angle
 
-        var new_speed_x = ball.speed_x * cos(2 * theta) - ball.speed_y * sin(2 * theta)
-        var new_speed_y = ball.speed_x * sin(2 * theta) + ball.speed_y * cos(2 * theta)
+        let new_speed_x = ball.speed_x * cos(2 * theta) - ball.speed_y * sin(2 * theta)
+        let new_speed_y = ball.speed_x * sin(2 * theta) + ball.speed_y * cos(2 * theta)
         ball.speed_x = new_speed_x
         ball.speed_y = new_speed_y
     }

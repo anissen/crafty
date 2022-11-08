@@ -12,17 +12,17 @@ foreign fn random(v Num) Num
 // foreign fn cos(v Num) Num
 // foreign fn sin(v Num) Num
 
-// foreign var mouse_x Num // TODO: Should use keyboard input instead
-foreign var mouse_clicked Bool // TODO: Should use keyboard input instead
+// foreign let mouse_x Num // TODO: Should use keyboard input instead
+foreign let mouse_clicked Bool // TODO: Should use keyboard input instead
 
 // colors from here: https://lospec.com/palette-list/bluedream4
-var color_background = '#ecf2cb'
-var color_primary = '#1f285d'
-var color_secondary = '#4b849a'
-var color_tertiary = '#98d8b1'
+let color_background = '#ecf2cb'
+let color_primary = '#1f285d'
+let color_secondary = '#4b849a'
+let color_tertiary = '#98d8b1'
 
-var screen_width = 800
-var screen_height = 600
+let screen_width = 800
+let screen_height = 600
 
 mut score = 0
 mut obstruction_countdown = 0
@@ -66,8 +66,8 @@ fn _update(dt Num) {
     obstruction_countdown -= dt
 
     if obstruction_countdown <= 0 {
-        var min_hole_height = 125
-        var hole_height = min_hole_height + 100 * random()
+        let min_hole_height = 125
+        let hole_height = min_hole_height + 100 * random()
         obstructions.push(Obstruction {
             x = screen_width,
             hole_y = (screen_height - hole_height) * random(),
@@ -76,7 +76,7 @@ fn _update(dt Num) {
         obstruction_countdown = 2.5 + 1.5 * random()
     }
 
-    var velocity_factor = 100
+    let velocity_factor = 100
     if mouse_clicked {
         player.vel_y = -175 * velocity_factor * dt
     }
@@ -87,7 +87,7 @@ fn _update(dt Num) {
     player.y += player.vel_y * dt
 
     color(color_tertiary)
-    var player_size = 40
+    let player_size = 40
     fill_rect(player.x, player.y, player_size, player_size)
 
     mut index = 0
@@ -101,7 +101,7 @@ fn _update(dt Num) {
         }
         
         // color(color_secondary)
-        var obstruction_width = 100
+        let obstruction_width = 100
         fill_rect(obstruction.x, 0, obstruction_width, obstruction.hole_y)
         fill_rect(obstruction.x, obstruction.hole_y + obstruction.hole_height, obstruction_width, screen_height)
         
