@@ -14,14 +14,18 @@ class Main {
     public static var backbuffer: kha.Image;
     static var game: Game;
 
-    static function render(frames: Array<Framebuffer>): Void {
-        game.render();
-
+    static function render(framebuffers: Array<Framebuffer>): Void {
+        final g = backbuffer.g2;
+        g.begin();
+		g.color = kha.Color.White;
+        game.render(g);
+        g.end();
+        
+        final framebuffer = framebuffers[0];
         // Scale to hi-DPI screens if required
-        final fb = frames[0];
-        final g2scaled = fb.g2;
+        final g2scaled = framebuffer.g2;
         g2scaled.begin();
-        Scaler.scale(backbuffer, fb, System.screenRotation);
+        Scaler.scale(backbuffer, framebuffer, System.screenRotation);
         g2scaled.end();
     }
     
@@ -112,7 +116,7 @@ class Main {
                 // Avoid passing update/render directly, so replacing them via code injection works
                 backbuffer = kha.Image.createRenderTarget(screenWidth, screenHeight);
 
-                game = new Game(backbuffer);
+                game = new Game(backbuffer.g2);
                 #if sys
                 final script = sys.io.File.getContent(file);
                 #else
