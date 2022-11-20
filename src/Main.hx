@@ -94,14 +94,12 @@ class Main {
     #end
 
     static function main() {
+        final fileName = 'breakout.cosy';
         #if sys
         final programDir = haxe.io.Path.directory(Sys.programPath());
         final relativeFilePath = (Sys.args().length > 0) ? Sys.args()[0] : 'assets/cosy/select.cosy';
         final file = haxe.io.Path.join([programDir, '../../..', relativeFilePath]);
         trace('Running $file');
-        final fileName = haxe.io.Path.withoutDirectory(file);
-        #else
-        final fileName = 'select.cosy'; 
         #end
 
         setFullWindowCanvas(); 
