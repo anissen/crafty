@@ -5,7 +5,7 @@ foreign fn clear() Void
 foreign fn color(c Str) Void
 foreign fn play_sound(name Str) Void
 
-foreign fn random(v Num) Num
+foreign fn random() Num
 // foreign fn max(a Num, b Num) Num
 // foreign fn min(a Num, b Num) Num
 // foreign fn atan2(a Num, b Num) Num

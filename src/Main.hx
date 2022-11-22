@@ -21,8 +21,8 @@ class Main {
         game.render(g);
         g.end();
         
-        final framebuffer = framebuffers[0];
         // Scale to hi-DPI screens if required
+        final framebuffer = framebuffers[0];
         final g2scaled = framebuffer.g2;
         g2scaled.begin();
         Scaler.scale(backbuffer, framebuffer, System.screenRotation);
