@@ -1,0 +1,66 @@
+// foreign fn clear() Void
+foreign fn color_rgb(r Num, g Num, b Num) Void
+foreign let mouse_x Num
+foreign let mouse_y Num
+foreign let mouse_clicked Bool
+foreign fn random() Num
+foreign fn fill_circle(x Num, y Num, radius Num) Void
+
+let screen_width = 800
+let screen_height = 600
+
+struct Position {
+    mut x Num
+    mut y Num
+}
+struct Velocity {
+    mut x Num
+    mut y Num
+}
+struct Color {
+    mut r Num
+    mut g Num
+    mut b Num
+}
+struct Life {
+    mut life Num
+}
+
+fn _update(delta Num) {
+    if mouse_clicked {
+        spawn(
+            Position { 
+                x = mouse_x, 
+                y = mouse_y,
+            }, 
+            Velocity { 
+                x = -1000 + random() * 2000, 
+                y = -1000 + random() * 2000,
+            },
+            Color {
+                r = random(),
+                g = random(),
+                b = random(),
+            },
+            Life { 
+                life = 10, 
+            }
+        )
+    }
+    query mut Position p, mut Velocity v {
+        p.x += v.x * delta
+        p.y += v.y * delta
+        if p.x < 0 or p.x > screen_width  { v.x = -v.x }
+        if p.y < 0 or p.y > screen_height { v.y = -v.y }
+    }
+    query mut Life l {
+        l.life -= delta
+    }
+
+    query Position p, Color c, Life l {
+        color_rgb(c.r, c.g, c.b)
+        mut x = l.life
+        if x < 1 { x = 1 }
+        fill_circle(p.x, p.y, x * 5)
+    }
+}

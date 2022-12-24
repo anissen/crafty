@@ -1,0 +1,255 @@
+foreign fn text(str Str, x Num, y Num) Void
+foreign fn fill_rect(x Num, y Num, width Num, height Num) Void
+foreign fn fill_circle(x Num, y Num, radius Num) Void
+foreign fn clear() Void
+foreign fn color(c Str) Void
+foreign fn play_sound(name Str) Void
+
+foreign fn max(a Num, b Num) Num
+foreign fn min(a Num, b Num) Num
+foreign fn atan2(a Num, b Num) Num
+foreign fn cos(v Num) Num
+foreign fn sin(v Num) Num
+
+foreign let mouse_x Num // TODO: Should use keyboard input instead
+foreign let mouse_clicked Bool // TODO: Should use keyboard input instead
+
+// colors from here: https://lospec.com/palette-list/bluedream4
+let color_background = '#ecf2cb'
+let color_primary = '#1f285d'
+let color_secondary = '#4b849a'
+let color_tertiary = '#98d8b1'
+
+let screen_width = 800
+let screen_height = 600
+
+let brick_width = 100
+let brick_height = 50
+let brick_padding = 20
+
+let paddle_width = 100
+let paddle_height = 20
+
+struct Rectangle {
+    mut x Num
+    mut y Num
+    mut width Num
+    mut height Num
+}
+
+struct Ball {
+    mut x Num
+    mut y Num
+    mut radius Num
+}
+
+struct Velocity {
+    mut x Num
+    mut y Num
+}
+
+struct Paddle {
+    mut offset Num
+}
+
+struct Brick {
+    mut lives Num
+}
+
+let start_lives = 3
+mut lives
+mut game_speed
+mut score
+mut is_started
+
+fn reset() {
+    spawn(Paddle{ offset = 0 }, Rectangle { 
+        x = screen_width / 2 - paddle_width / 2,
+        y = screen_height - paddle_height / 2 - 50,
+        width = 100,
+        height = 20
+    })
+    
+    spawn(Ball { 
+        x = screen_width / 2,
+        y = screen_height - 100,
+        radius = 10
+    }, Velocity {
+        x = 5,
+        y = 5
+    })
+
+    game_speed = 50
+    is_started = false
+}
+
+fn restart() {
+    // setup bricks
+    for x in 0..6 {
+        for y in 0..5 {
+            mut brick_lives = 1
+            if y % 2 == 0 {
+                brick_lives = 2
+            }
+            spawn(Brick{
+                lives = brick_lives
+            }, Rectangle {
+                x = 50 + x * (brick_width + brick_padding),
+                y = 100 + y * (brick_height + brick_padding),
+                width = brick_width,
+                height = brick_height 
+            })
+        }
+    }
+
+    lives = start_lives
+    score = 0
+    reset()
+}
+// restart()
+
+fn ball_collision(x Num, y Num, width Num, height Num) Bool {
+    query Ball ball, mut Velocity vel {
+        let ball_top = ball.y - ball.radius
+        let ball_bottom = ball.y + ball.radius
+        let ball_right = ball.x + ball.radius
+        let ball_left = ball.x - ball.radius
+        let bottom = y + height
+        let right = x + width
+        let is_inside_width = ball_right >= x and ball_left <= x + width
+        let is_inside_height =  ball_bottom >= y and ball_top <= y + height
+        let collision = (ball_top <= bottom and ball_top > bottom + vel.y and is_inside_width and vel.y < 0) or // Hit from below
+        (ball_bottom >= y and ball_bottom < y + vel.y and is_inside_width and vel.y > 0) or // Hit from above
+        (ball_right >= x and ball_right < x + vel.x and is_inside_height and vel.x > 0) or // Hit from left
+        (ball_left <= right and ball_left > right + vel.x and is_inside_height and vel.x < 0) // Hit from right
+
+        if collision {
+            // https://stackoverflow.com/a/45373126/802826
+            let nearest_x = max(x, min(ball.x, x + width))
+            let nearest_y = max(y, min(ball.y, y + height))
+            let dist_x = (ball.x - nearest_x)
+            let dist_y = (ball.y - nearest_y)
+
+            let normal_angle = atan2(dist_x, -dist_y)
+            let incoming_angle = atan2(vel.y, vel.x)
+            let theta = normal_angle - incoming_angle
+
+            let new_speed_x = vel.x * cos(2 * theta) - vel.y * sin(2 * theta)
+            let new_speed_y = vel.x * sin(2 * theta) + vel.y * cos(2 * theta)
+            vel.x = new_speed_x
+            vel.y = new_speed_y
+            return true
+        }
+    }
+    return false
+}
+
+fn _update(dt Num) {
+    if !is_started and mouse_clicked {
+        if lives > 0 {
+            is_started = true
+        } else {
+            restart()
+        }
+    }
+
+    color(color_background)
+    clear()
+
+    // paddle
+    color(color_tertiary)
+    query Paddle p, mut Rectangle paddle {
+        paddle.x = p.offset + mouse_x - paddle.width / 2
+        if paddle.x < 0 {
+            paddle.x = 0
+        } else if paddle.x > screen_width - paddle.width {
+            paddle.x = screen_width - paddle.width
+        }
+        fill_rect(paddle.x, paddle.y, paddle.width, paddle.height)
+    }
+
+    if is_started {
+        // balls
+        color(color_primary)
+
+        mut balls_left = 0
+        query mut Ball ball, mut Velocity vel {
+            balls_left += 1
+            ball.x += vel.x * dt * game_speed
+            ball.y += vel.y * dt * game_speed
+            if ball.x <= 0 {
+                ball.x = ball.radius
+                vel.x = -vel.x
+                play_sound('bump2')
+            } else if ball.x + ball.radius >= screen_width {
+                ball.x = screen_width - ball.radius
+                vel.x = -vel.x
+                play_sound('bump2')
+            }
+            if ball.y <= 0 {
+                ball.y = ball.radius
+                vel.y = -vel.y
+                play_sound('bump2')
+            } else if ball.y + ball.radius >= screen_height {
+                balls_left -= 1
+            }
+            fill_circle(ball.x, ball.y, ball.radius)
+        }
+        if balls_left == 0 {
+            reset()
+        } 
+        game_speed += dt * 2
+    } else {
+        query mut Ball ball {
+            query Paddle, Rectangle rect {
+                ball.x = rect.x + rect.width / 2
+                break
+            }
+        }
+    }
+
+    // resolve ball collision with paddle
+    query Paddle, Rectangle paddle {
+        if ball_collision(paddle.x, paddle.y, paddle.width, paddle.height) {
+            play_sound('bump2')
+        }
+    }
+    
+    // bricks
+    query mut Brick brick, Rectangle rect {
+        if brick.lives <= 0 {
+            continue
+        }
+
+        if ball_collision(rect.x, rect.y, rect.width, rect.height) {
+            play_sound('bump')
+            brick.lives -= 1
+            if brick.lives <= 0 {
+                score += 1
+                spawn(Ball{ x = rect.x + rect.width / 2, y = rect.y + rect.height / 2, radius = 5 }, 
+                        Velocity { x = -5, y = -5 })
+                if score % 4 == 0 {
+                    spawn(Paddle{ offset = score * 25 }, Rectangle { 
+                        x = screen_width / 2 - paddle_width / 2 + 150,
+                        y = screen_height - paddle_height / 2 - 50,
+                        width = 40,
+                        height = 20
+                    })
+                }
+            }
+        } else {
+            if brick.lives == 2 { // TODO: Should be a switch/match statement
+                color(color_tertiary)
+            } else {
+                color(color_secondary)
+            }
+            fill_rect(rect.x, rect.y, rect.width, rect.height)
+        }
+    }
+
+    color(color_primary)
+    text('Lives: {lives}, Score: {score}', screen_width / 2, 40)
+    if lives <= 0 {
+        text('Game Over!', screen_width / 2, screen_height / 2)
+    }
+}
