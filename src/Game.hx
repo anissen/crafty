@@ -286,7 +286,7 @@ class Game {
         g.drawString('${error_index + 1}/${errors.length} errors in ${fileName}', 30, 30);
         
         g.color = kha.Color.Black;
-        g.fontSize = 24;
+        g.fontSize = 18;
         var y = 150.0;
         for (line in errors[error_index].split('\n')) {
             g.drawString(line, 20, y);
