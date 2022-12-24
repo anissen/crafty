@@ -97,7 +97,7 @@ class Main {
         final fileName = 'breakout.cosy';
         #if sys
         final programDir = haxe.io.Path.directory(Sys.programPath());
-        final relativeFilePath = (Sys.args().length > 0) ? Sys.args()[0] : 'assets/cosy/select.cosy';
+        final relativeFilePath = (Sys.args().length > 0) ? Sys.args()[0] : 'assets/games/breakout.cosy';
         final file = haxe.io.Path.join([programDir, '../../..', relativeFilePath]);
         trace('Running $file');
         #end
