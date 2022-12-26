@@ -158,14 +158,14 @@ fn _update(dt Num) {
 
     // paddle
     color(color_tertiary)
-    query Paddle p, mut Rectangle paddle {
-        paddle.x = p.offset + mouse_x - paddle.width / 2
-        if paddle.x < 0 {
-            paddle.x = 0
-        } else if paddle.x > screen_width - paddle.width {
-            paddle.x = screen_width - paddle.width
+    query Paddle paddle, mut Rectangle rect {
+        rect.x = paddle.offset + mouse_x - rect.width / 2
+        if rect.x < 0 {
+            rect.x = 0
+        } else if rect.x > screen_width - rect.width {
+            rect.x = screen_width - rect.width
         }
-        fill_rect(paddle.x, paddle.y, paddle.width, paddle.height)
+        fill_rect(rect.x, rect.y, rect.width, rect.height)
     }
 
     if is_started {
@@ -226,16 +226,6 @@ fn _update(dt Num) {
             brick.lives -= 1
             if brick.lives <= 0 {
                 score += 1
-                spawn(Ball{ x = rect.x + rect.width / 2, y = rect.y + rect.height / 2, radius = 5 }, 
-                        Velocity { x = -5, y = -5 })
-                if score % 4 == 0 {
-                    spawn(Paddle{ offset = score * 25 }, Rectangle { 
-                        x = screen_width / 2 - paddle_width / 2 + 150,
-                        y = screen_height - paddle_height / 2 - 50,
-                        width = 40,
-                        height = 20
-                    })
-                }
             }
         } else {
             if brick.lives == 2 { // TODO: Should be a switch/match statement

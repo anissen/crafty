@@ -94,10 +94,10 @@ class Main {
     #end
 
     static function main() {
-        final fileName = 'breakout.cosy';
+        final fileName = 'breakout-ecs.cosy';
         #if sys
         final programDir = haxe.io.Path.directory(Sys.programPath());
-        final relativeFilePath = (Sys.args().length > 0) ? Sys.args()[0] : 'assets/games/breakout.cosy';
+        final relativeFilePath = (Sys.args().length > 0) ? Sys.args()[0] : 'assets/games/breakout-ecs.cosy';
         final file = haxe.io.Path.join([programDir, '../../..', relativeFilePath]);
         trace('Running $file');
         #end
