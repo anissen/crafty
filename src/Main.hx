@@ -8,6 +8,8 @@ import kha.Scheduler;
 import kha.System;
 import kha.Scaler;
 
+using StringTools;
+
 class Main {
     public static inline var screenWidth = 800;
     public static inline var screenHeight = 600;
@@ -41,6 +43,14 @@ class Main {
         } else {
             game.keyDown(key);
         }
+    }
+
+    static function keyUp(key: kha.input.KeyCode) {
+        game.keyUp(key);
+    }
+
+    static function keyPress(char: String) {
+
     }
 
     static function setFullWindowCanvas(): Void {
@@ -118,14 +128,15 @@ class Main {
                 #if sys
                 final script = sys.io.File.getContent(file);
                 #else
-                final script = Assets.blobs.get(StringTools.replace(fileName, '.', '_')).toString();
+                final name = fileName.replace('.', '_').replace('-', '_');
+                final script = Assets.blobs.get(name).toString();
                 #end
                 game.reloadScript(fileName, script);
 
                 Scheduler.addTimeTask(function () { update(); }, 0, 1 / 60);
                 System.notifyOnFrames(function (frames) { render(frames); });
                 Mouse.get().notify(game.mouseDown, null, game.mouseMove, null, null);
-                Keyboard.get().notify(keyDown);
+                Keyboard.get().notify(keyDown, keyUp, keyPress);
             });
         });
     }

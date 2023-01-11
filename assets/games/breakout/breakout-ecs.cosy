@@ -11,8 +11,9 @@ foreign fn atan2(a Num, b Num) Num
 foreign fn cos(v Num) Num
 foreign fn sin(v Num) Num
 
-foreign let mouse_x Num // TODO: Should use keyboard input instead
-foreign let mouse_clicked Bool // TODO: Should use keyboard input instead
+foreign mut key_left Bool = false
+foreign mut key_right Bool = false
+foreign mut key_space Bool = false
 
 // colors from here: https://lospec.com/palette-list/bluedream4
 let color_background = '#ecf2cb'
@@ -29,6 +30,7 @@ let brick_padding = 20
 
 let paddle_width = 100
 let paddle_height = 20
+let paddle_move_speed = 500
 
 struct Rectangle {
     mut x Num
@@ -145,7 +147,7 @@ fn ball_collision(x Num, y Num, width Num, height Num) Bool {
 }
 
 fn _update(dt Num) {
-    if !is_started and mouse_clicked {
+    if !is_started and key_space {
         if lives > 0 {
             is_started = true
         } else {
@@ -158,8 +160,12 @@ fn _update(dt Num) {
 
     // paddle
     color(color_tertiary)
-    query Paddle paddle, mut Rectangle rect {
-        rect.x = paddle.offset + mouse_x - rect.width / 2
+    query Paddle, mut Rectangle rect {
+        if key_left {
+            rect.x -= paddle_move_speed * dt
+        } else if key_right {
+            rect.x += paddle_move_speed * dt
+        }
         if rect.x < 0 {
             rect.x = 0
         } else if rect.x > screen_width - rect.width {
@@ -209,8 +215,8 @@ fn _update(dt Num) {
     }
 
     // resolve ball collision with paddle
-    query Paddle, Rectangle paddle {
-        if ball_collision(paddle.x, paddle.y, paddle.width, paddle.height) {
+    query Paddle, Rectangle rect {
+        if ball_collision(rect.x, rect.y, rect.width, rect.height) {
             play_sound('bump2')
         }
     }

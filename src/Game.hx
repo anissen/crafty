@@ -211,16 +211,32 @@ class Game {
     public function mouseUp(button: Int, x: Int, y: Int): Void {
         
     }
+
+    public function keyCodeToString(key: KeyCode) {
+        return switch key {
+            case Left: 'left';
+            case Right: 'right';
+            case Up: 'up';
+            case Down: 'down';
+            case Space: 'space';
+            case _: '?';
+        }
+    }
     
 	public function keyDown(key:KeyCode) {
-        // compiler.setVariable('key_' + key.toString(), true);
         if (errors.length > 0) {
             switch key {
                 case KeyCode.Up | KeyCode.Left: error_index--;
                 case KeyCode.Right | KeyCode.Down: error_index++;
                 case _:
             }
+        } else {
+            compiler.setVariable('key_' + keyCodeToString(key), true);
         }
+    }
+
+    public function keyUp(key: KeyCode) {
+        compiler.setVariable('key_' + keyCodeToString(key), false);
     }
     
     function isScriptValid() {
