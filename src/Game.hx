@@ -61,6 +61,15 @@ class Game {
         compiler.setVariable('mouse_x', 0);
         compiler.setVariable('mouse_y', 0);
         compiler.setFunction('sin', (args) -> Math.sin(args[0]));
+        // clamp(value, min, max)
+        compiler.setFunction('clamp', (args) -> {
+            final value: Float = args[0];
+            final min: Float = args[1];
+            final max: Float = args[2];
+            if (value < min) return min;
+            if (value > max) return max;
+            return value;
+        });
         // compiler.setFunction('background', (args) -> {
         //     g.clear(kha.Color.fromString((args[0]: String)));
         //     return 0;
@@ -79,6 +88,8 @@ class Game {
             g.fillRect(x, y, width, height);
             return 0;
         });
+        
+        // image(image_name, x, y)
         compiler.setFunction('image', (args) -> { 
             var img = Assets.images.get((args[0]: String));
             g.drawImage(img, (args[1]: kha.FastFloat), (args[2]: kha.FastFloat));
@@ -101,6 +112,9 @@ class Game {
             }
             g.drawString(text, x, y);
             return 0;
+        });
+        compiler.setFunction('set_text_size', (args) -> {
+            g.fontSize = args[0];
         });
         compiler.setFunction('text_align', (args) -> { 
             textAlign = switch (args[0]: String) {
@@ -171,16 +185,16 @@ class Game {
             kha.audio1.Audio.play(Assets.sounds.get(name));
             return 0;
         });
-        // compiler.setFunction('push_translation', (args) -> { 
-        //     var x = (args[0]: Float);
-        //     var y = (args[1]: Float);
-        //     g.pushTranslation(x, y);
-        //     return 0;
-        // });
-        // compiler.setFunction('pop_translation', (args) -> { 
-        //     g.popTransformation();
-        //     return 0;
-        // });
+        compiler.setFunction('push_translation', (args) -> { 
+            var x = (args[0]: Float);
+            var y = (args[1]: Float);
+            g.pushTranslation(x, y);
+            return 0;
+        });
+        compiler.setFunction('pop_translation', (args) -> { 
+            g.popTransformation();
+            return 0;
+        });
         // compiler.setFunction('translate', (args) -> { 
         //     var x = (args[0]: Float);
         //     var y = (args[1]: Float);
@@ -194,7 +208,7 @@ class Game {
         //     return 0;
         // });
 
-        time = System.time;
+        setup(g);
     }
 
     public function mouseMove(x: Float, y: Float, moveX: Float, moveY: Float): Void {
@@ -249,6 +263,8 @@ class Game {
         this.script = script;
         statements = compiler.parse(script);
         if (!isScriptValid()) return;
+
+        // TODO: Appearently we need to save and restore the ECS state?
         
         // TODO: Register a callback for runtime errors
         
@@ -265,14 +281,19 @@ class Game {
         compiler.runFunction('restart');
         if (!isScriptValid()) return;
     }
-        
+
+    function setup(g: kha.graphics2.Graphics) {
+        time = System.time;
+
+        g.font = Assets.fonts.brass_mono_regular;
+        g.fontSize = 48;
+    }
+    
     public function update(): Void {
         // ...
     }
 
     public function render(g: kha.graphics2.Graphics): Void {
-        g.font = Assets.fonts.brass_mono_regular;
-        g.fontSize = 48;
         compiler.setVariable('time', System.time);
         compiler.setVariable('mouse_clicked', mouseClicked);
         mouseClicked = false;

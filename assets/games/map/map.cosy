@@ -1,0 +1,113 @@
+foreign fn image(str Str, x Num, y Num) Void
+foreign fn push_translation(x Num, y Num) Void
+foreign fn pop_translation() Void
+foreign fn text(str Str, x Num, y Num) Void
+foreign fn set_text_size(size Num) Void
+foreign fn random() Num
+foreign fn sin(v Num) Num
+// foreign fn cos(v Num) Num
+foreign fn clamp(v Num, min Num, max Num) Num
+
+foreign mut key_left = false
+foreign mut key_right = false
+foreign mut key_up = false
+foreign mut key_down = false
+
+let screen_width = 800 / 4
+let screen_height = 640 / 4
+
+struct Pos {
+    mut x Num
+    mut y Num
+}
+mut cam = Pos { x = screen_width / 2, y = screen_height / 2 }
+
+let map_width = 16
+let map_height = 16
+
+let tile_width = 16
+let tile_height = 16
+
+struct TilePos {
+    mut x Num
+    mut y Num
+    mut offset_x Num = 0
+    mut offset_y Num = 0
+}
+
+struct Sprite {
+    mut image Str
+}
+
+struct Tile {}
+struct Player {}
+
+fn setup() {
+    set_text_size(10)
+
+    // setup tiles
+    for x in 0..map_width {
+        for y in 0..map_height {
+            mut img = 'tile_0000'
+            if random() < 0.5 {
+                img = 'tile_0002'
+            }
+            spawn(
+                Tile {},
+                TilePos {
+                    x = x,
+                    y = y,
+                },
+                Sprite {
+                    image = img,
+                }
+            )
+        }
+    }
+
+    spawn(
+        Player {},
+        TilePos {
+            x = 4,
+            y = 4,
+        },
+        Sprite { image = 'tile_0105', }
+    )
+}
+setup()
+
+mut time = 0
+fn _update(dt Num) {
+    time += dt
+    let view_x = -clamp(cam.x, 0, map_width * tile_width - screen_width)
+    let view_y = -clamp(cam.y, 0, map_height * tile_height - screen_height)
+    push_translation(view_x, view_y)
+
+    query Tile, TilePos pos, Sprite sprite {
+        image(sprite.image, pos.x * tile_width + pos.offset_x, pos.y * tile_height + pos.offset_y)
+    }
+    query Player, mut TilePos pos, Sprite sprite {
+        if key_left and pos.x > 0 {
+            pos.x -= 1
+            key_left = false
+        } else if key_right and pos.x < map_width - 1 {
+            pos.x += 1
+            key_right = false
+        } else if key_up and pos.y > 0 {
+            pos.y -= 1
+            key_up = false
+        } else if key_down and pos.y < map_height - 1 {
+            pos.y += 1
+            key_down = false
+        }
+        pos.offset_y = sin(time * 5) * tile_height / 8
+        // pos.offset_x = cos(time * 5) * tile_width / 4
+        cam.x = pos.x * tile_width - screen_width / 2
+        cam.y = pos.y * tile_height - screen_height / 2
+
+        image(sprite.image, pos.x * tile_width + pos.offset_x, pos.y * tile_height + pos.offset_y)
+        text('player', (pos.x + 0.5) * tile_width, (pos.y + 1) * tile_width)
+    }
+
+    pop_translation()
+}
