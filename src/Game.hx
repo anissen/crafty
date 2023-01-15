@@ -23,6 +23,8 @@ class Game {
     var script = '';
     var errors: Array<String> = [];
     var error_index = 0;
+    public var image: kha.Image;
+    var graphics: kha.graphics2.Graphics;
 
     var time: Float;
     var textAlign = Center;
@@ -33,7 +35,7 @@ class Game {
 
 	var mouseY:Float;
 
-    public function new(g: kha.graphics2.Graphics) {
+    public function new() {
         compiler = cosy.Cosy.createCompiler();
 
         #if sys
@@ -75,24 +77,24 @@ class Game {
         //     return 0;
         // });
         compiler.setFunction('clear', (args) -> {
-            g.clear(g.color);
+            graphics.clear(graphics.color);
             return 0;
         });
-        compiler.setFunction('color', (args) -> g.color = kha.Color.fromString((args[0]: String)));
-        compiler.setFunction('color_rgb', (args) -> g.color = kha.Color.fromFloats(args[0], args[1], args[2]));
+        compiler.setFunction('color', (args) -> graphics.color = kha.Color.fromString((args[0]: String)));
+        compiler.setFunction('color_rgb', (args) -> graphics.color = kha.Color.fromFloats(args[0], args[1], args[2]));
         compiler.setFunction('fill_rect', (args) -> {
             final x = (args[0]: Float);
             final y = (args[1]: Float);
             final width = (args[2]: Float);
             final height = (args[3]: Float);
-            g.fillRect(x, y, width, height);
+            graphics.fillRect(x, y, width, height);
             return 0;
         });
         
         // image(image_name, x, y)
         compiler.setFunction('image', (args) -> { 
             var img = Assets.images.get((args[0]: String));
-            g.drawImage(img, (args[1]: kha.FastFloat), (args[2]: kha.FastFloat));
+            graphics.drawImage(img, (args[1]: kha.FastFloat), (args[2]: kha.FastFloat));
             return 0;
         });
         
@@ -102,19 +104,19 @@ class Game {
             var y = (args[2]: Float);
             switch textAlign {
                 case Left: 
-                case Center: x -= g.font.width(g.fontSize, text) / 2;
-                case Right:  x -= g.font.width(g.fontSize, text);
+                case Center: x -= graphics.font.width(graphics.fontSize, text) / 2;
+                case Right:  x -= graphics.font.width(graphics.fontSize, text);
             }
             switch textVAlign {
                 case Top:    
-                case Middle: y -= g.font.height(g.fontSize) / 2;
-                case Bottom: y -= g.font.height(g.fontSize);
+                case Middle: y -= graphics.font.height(graphics.fontSize) / 2;
+                case Bottom: y -= graphics.font.height(graphics.fontSize);
             }
-            g.drawString(text, x, y);
+            graphics.drawString(text, x, y);
             return 0;
         });
         compiler.setFunction('set_text_size', (args) -> {
-            g.fontSize = args[0];
+            graphics.fontSize = args[0];
         });
         compiler.setFunction('text_align', (args) -> { 
             textAlign = switch (args[0]: String) {
@@ -136,17 +138,17 @@ class Game {
         });
         compiler.setFunction('text_width', (args) -> { 
             final text = (args[0]: String);
-            return g.font.width(g.fontSize, text);
+            return graphics.font.width(graphics.fontSize, text);
         });
         compiler.setFunction('text_height', (args) -> { 
-            return g.font.height(g.fontSize);
+            return graphics.font.height(graphics.fontSize);
         });
         compiler.setFunction('line', (args) -> { 
             var x1 = (args[0]: Float);
             var y1 = (args[1]: Float);
             var x2 = (args[2]: Float);
             var y2 = (args[3]: Float);
-            g.drawLine(x1, y1, x2, y2, 5.0);
+            graphics.drawLine(x1, y1, x2, y2, 5.0);
             return 0;
         });
         compiler.setFunction('circle', (args) -> { 
@@ -160,7 +162,7 @@ class Game {
                 var y1 = y + radius * Math.sin(angle_per_segment * i);
                 var x2 = x + radius * Math.cos(angle_per_segment * (i + 1));
                 var y2 = y + radius * Math.sin(angle_per_segment * (i + 1));
-                g.drawLine(x1, y1, x2, y2, 2.0);
+                graphics.drawLine(x1, y1, x2, y2, 2.0);
             }
             return 0;
         });
@@ -176,7 +178,7 @@ class Game {
                 var y1 = y + radius * Math.sin(angle_per_segment * i);
                 var x2 = x + radius * Math.cos(angle_per_segment * (i + 1));
                 var y2 = y + radius * Math.sin(angle_per_segment * (i + 1));
-                g.fillTriangle(x, y, x1, y1, x2, y2);
+                graphics.fillTriangle(x, y, x1, y1, x2, y2);
             }
             return 0;
         });
@@ -188,11 +190,11 @@ class Game {
         compiler.setFunction('push_translation', (args) -> { 
             var x = (args[0]: Float);
             var y = (args[1]: Float);
-            g.pushTranslation(x, y);
+            graphics.pushTranslation(x, y);
             return 0;
         });
         compiler.setFunction('pop_translation', (args) -> { 
-            g.popTransformation();
+            graphics.popTransformation();
             return 0;
         });
         // compiler.setFunction('translate', (args) -> { 
@@ -207,8 +209,22 @@ class Game {
         //     g.translate(x, y);
         //     return 0;
         // });
+        compiler.setFunction('set_size', (args) -> { 
+            final width: Int  = args[0];
+            final height: Int = args[1];
+            setupGraphics(width, height);
+            return 0;
+        });
+        
+        setup();
+    }
 
-        setup(g);
+    public function setupGraphics(screenWidth: Int, screenHeight: Int) {
+        image = kha.Image.createRenderTarget(screenWidth, screenHeight);
+        graphics = image.g2;
+
+        graphics.font = Assets.fonts.brass_mono_regular;
+        graphics.fontSize = 48;
     }
 
     public function mouseMove(x: Float, y: Float, moveX: Float, moveY: Float): Void {
@@ -282,11 +298,8 @@ class Game {
         if (!isScriptValid()) return;
     }
 
-    function setup(g: kha.graphics2.Graphics) {
+    function setup() {
         time = System.time;
-
-        g.font = Assets.fonts.brass_mono_regular;
-        g.fontSize = 48;
     }
     
     public function update(): Void {

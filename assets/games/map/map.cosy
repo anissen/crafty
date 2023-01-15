@@ -2,6 +2,7 @@ foreign fn image(str Str, x Num, y Num) Void
 foreign fn push_translation(x Num, y Num) Void
 foreign fn pop_translation() Void
 foreign fn text(str Str, x Num, y Num) Void
+foreign fn set_size(width Num, height Num) Void
 foreign fn set_text_size(size Num) Void
 foreign fn random() Num
 foreign fn sin(v Num) Num
@@ -13,8 +14,8 @@ foreign mut key_right = false
 foreign mut key_up = false
 foreign mut key_down = false
 
-let screen_width = 800 / 4
-let screen_height = 640 / 4
+let screen_width = 200
+let screen_height = 160
 
 struct Pos {
     mut x Num
@@ -43,6 +44,7 @@ struct Tile {}
 struct Player {}
 
 fn setup() {
+    set_size(screen_width, screen_height)
     set_text_size(10)
 
     // setup tiles

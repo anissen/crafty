@@ -13,10 +13,10 @@ using StringTools;
 class Main {
     public static inline var screenWidth = 800;
     public static inline var screenHeight = 600;
-    public static var backbuffer: kha.Image;
     static var game: Game;
 
     static function render(framebuffers: Array<Framebuffer>): Void {
+        final backbuffer = game.image;
         final g = backbuffer.g2;
         g.begin();
 		g.color = kha.Color.White;
@@ -121,10 +121,8 @@ class Main {
                 watchFile(file);
                 #end
 
-                // Avoid passing update/render directly, so replacing them via code injection works
-                backbuffer = kha.Image.createRenderTarget(screenWidth, screenHeight);
-
-                game = new Game(backbuffer.g2);
+                game = new Game();
+                game.setupGraphics(screenWidth, screenHeight);
                 #if sys
                 final script = sys.io.File.getContent(file);
                 #else
