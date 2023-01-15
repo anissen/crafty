@@ -215,6 +215,18 @@ class Game {
             setupGraphics(width, height);
             return 0;
         });
+        compiler.setFunction('push_scissor', (args) -> {
+            final x: Int = args[0];
+            final y: Int = args[1];
+            final width: Int = args[2];
+            final height: Int = args[3];
+            graphics.scissor(x, y, (width > 0 ? width : 0), (height > 0 ? height : 0));
+            return 0;
+        });
+        compiler.setFunction('pop_scissor', (args) -> {
+            graphics.disableScissor();
+            return 0;
+        });
         
         setup();
     }
