@@ -273,12 +273,21 @@ class Game {
                 case _:
             }
         } else {
-            compiler.setVariable('key_' + keyCodeToString(key), true);
+            compiler.setVariable('key_press_' + keyCodeToString(key), false);
+            compiler.setVariable('key_down_' + keyCodeToString(key), true);
         }
     }
-
+    
     public function keyUp(key: KeyCode) {
-        compiler.setVariable('key_' + keyCodeToString(key), false);
+        compiler.setVariable('key_press_' + keyCodeToString(key), true);
+        compiler.setVariable('key_down_' + keyCodeToString(key), false);
+    }
+    
+    function resetKeysDown() {
+        for (key in ['left', 'right', 'up', 'down', 'space']) {
+            compiler.setVariable('key_press_$key', false);
+            // compiler.setVariable('key_down_$key', false);
+        }
     }
     
     function isScriptValid() {
@@ -328,6 +337,7 @@ class Game {
             compiler.runFunction('_update', dt); // the underscore is a hack to avoid flagging the function as unused
             isScriptValid();
         }
+        resetKeysDown();
         if (errors.length > 0) {
             renderErrors(g); 
         }

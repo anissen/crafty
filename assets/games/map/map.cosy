@@ -9,13 +9,13 @@ foreign fn sin(v Num) Num
 // foreign fn abs(v Num) Num
 foreign fn clamp(v Num, min Num, max Num) Num
 
-foreign mut key_left = false
-foreign mut key_right = false
-foreign mut key_up = false
-foreign mut key_down = false
 // foreign fn push_scissor(x Num, y Num, width Num, height Num)
 // foreign fn pop_scissor()
 
+foreign mut key_press_left = false
+foreign mut key_press_right = false
+foreign mut key_press_up = false
+foreign mut key_press_down = false
 
 let screen_width = 200
 let screen_height = 160
@@ -94,18 +94,14 @@ fn _update(dt Num) {
         image(sprite.image, pos.x * tile_width + pos.offset_x, pos.y * tile_height + pos.offset_y)
     }
     query Player, mut TilePos pos, Sprite sprite {
-        if key_left and pos.x > 0 {
+        if key_press_left and pos.x > 0 {
             pos.x -= 1
-            key_left = false
-        } else if key_right and pos.x < map_width - 1 {
+        } else if key_press_right and pos.x < map_width - 1 {
             pos.x += 1
-            key_right = false
-        } else if key_up and pos.y > 0 {
+        } else if key_press_up and pos.y > 0 {
             pos.y -= 1
-            key_up = false
-        } else if key_down and pos.y < map_height - 1 {
+        } else if key_press_down and pos.y < map_height - 1 {
             pos.y += 1
-            key_down = false
         }
         pos.offset_y = sin(time * 5) * tile_height / 8
         // pos.offset_x = cos(time * 5) * tile_width / 4
