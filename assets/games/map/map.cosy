@@ -6,13 +6,16 @@ foreign fn set_size(width Num, height Num) Void
 foreign fn set_text_size(size Num) Void
 foreign fn random() Num
 foreign fn sin(v Num) Num
-// foreign fn cos(v Num) Num
+// foreign fn abs(v Num) Num
 foreign fn clamp(v Num, min Num, max Num) Num
 
 foreign mut key_left = false
 foreign mut key_right = false
 foreign mut key_up = false
 foreign mut key_down = false
+// foreign fn push_scissor(x Num, y Num, width Num, height Num)
+// foreign fn pop_scissor()
+
 
 let screen_width = 200
 let screen_height = 160
@@ -84,6 +87,8 @@ fn _update(dt Num) {
     let view_x = -clamp(cam.x, 0, map_width * tile_width - screen_width)
     let view_y = -clamp(cam.y, 0, map_height * tile_height - screen_height)
     push_translation(view_x, view_y)
+    // let p = abs(sin(time))
+    // push_scissor(p * screen_width / 2, p * screen_height / 2, screen_width - p * screen_width, screen_height - p * screen_height)
 
     query Tile, TilePos pos, Sprite sprite {
         image(sprite.image, pos.x * tile_width + pos.offset_x, pos.y * tile_height + pos.offset_y)
@@ -111,5 +116,7 @@ fn _update(dt Num) {
         text('player', (pos.x + 0.5) * tile_width, (pos.y + 1) * tile_width)
     }
 
+    // pop_scissor()
     pop_translation()
+
 }
