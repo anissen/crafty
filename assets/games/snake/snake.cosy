@@ -1,0 +1,161 @@
+foreign fn fill_rect(x Num, y Num, width Num, height Num) Void
+foreign fn fill_circle(x Num, y Num, radius Num) Void
+foreign fn clear() Void
+foreign fn color(c Str) Void
+foreign fn text(str Str, x Num, y Num) Void
+// foreign fn play_sound(name Str) Void
+foreign fn sin(v Num) Num
+foreign fn abs(v Num) Num
+foreign fn random_int(max Num) Num
+
+foreign mut key_press_left Bool = false
+foreign mut key_press_right Bool = false
+foreign mut key_press_up Bool = false
+foreign mut key_press_down Bool = false
+
+// colors from here: https://lospec.com/palette-list/bluedream4
+let color_black = '#040F16'
+let color_white = '#FBFBFF'
+let color_light_blue = '#01BAEF'
+let color_dark_blue = '#0B4F6C'
+// let color_red = '#B80C09'
+
+let screen_width = 800
+// let screen_height = 600
+
+let grid_size = 50
+let grid_padding = 5
+
+// let move_speed = 500
+
+mut score = 0
+
+struct Position {
+    mut x Num
+    mut y Num
+}
+
+// mut snake = Position { x = 5, y = 5 }
+struct Cell {}
+
+struct Snake {
+    mut positions Array Position
+}
+
+mut snake = Snake { 
+    positions = [ Position { x = 5, y = 5 } ]
+}
+
+mut fruits Array Position = []
+
+fn pos_to_grid(pos Position) Position {
+    return Position {
+        x = grid_padding + pos.x * (grid_size + grid_padding) + grid_size / 2,
+        y = 70 + grid_padding + pos.y * (grid_size + grid_padding) + grid_size / 2
+    }
+}
+
+fn restart() { // should be 'setup()'
+    // TODO: Should clear old ECS state
+    // context.reset()
+
+    for x in 0..14 {
+        for y in 0..9 {
+            let p = pos_to_grid(Position { x = x, y = y })
+            // if x == 7 and y == 3 continue
+            spawn(Cell {}, p)
+        }
+    }
+
+    // snake = Snake { 
+    //     positions = [ Position { 5, 5 } ] 
+    // }
+
+    score = 0
+}
+restart()
+
+mut snake_size = grid_size * 1.0
+mut snake_vel_x = 0
+mut snake_vel_y = 0
+let move_speed = 5
+mut next_move = 1
+mut snake_length = 1
+mut time = 0
+let fruit_delay = 4
+mut next_fruit = fruit_delay
+
+fn _update(dt Num) {
+    color(color_black)
+    clear()
+
+    // grid
+    color(color_dark_blue)
+    query Cell, Position pos {
+        fill_rect(pos.x, pos.y, grid_size, grid_size)
+    }
+    // for x in 0..14 {
+    //     for y in 0..9 {
+    //         fill_rect(grid_padding + x * (grid_size + grid_padding), 70 + grid_padding + y * (grid_size + grid_padding), grid_size, grid_size)
+    //     }
+    // }
+
+    if key_press_left {
+        snake_vel_x = -1
+        snake_vel_y = 0
+    } else if key_press_right {
+        snake_vel_x = 1
+        snake_vel_y = 0
+    } else if key_press_up {
+        snake_vel_x = 0
+        snake_vel_y = -1
+    } else if key_press_down {
+        snake_vel_x = 0
+        snake_vel_y = 1
+    }
+    next_fruit -= dt
+    if next_fruit <= 0 {
+        next_fruit = fruit_delay
+
+        fruits.push(Position { x = random_int(14), y = random_int(9) })
+    }
+
+    next_move -= move_speed * dt
+    if next_move <= 0 {
+        next_move = 1
+        let head = snake.positions[snake.positions.length - 1]
+        mut snake_x = head.x + snake_vel_x
+        let snake_y = head.y + snake_vel_y
+        if snake_x > 14 {
+            snake_x = 0
+        }
+        snake.positions.push(Position { x = snake_x, y = snake_y })
+        if snake.positions.length > snake_length {
+            snake.positions.shift() 
+        }
+    }
+    
+    color(color_light_blue)
+    let fruit_size = 10
+    for fruit in fruits {
+        let p = pos_to_grid(fruit)
+        fill_circle(p.x, p.y, fruit_size)
+    }
+
+    // fill_rect(grid_padding + x * (grid_size + grid_padding), 70 + grid_padding + y * (grid_size + grid_padding), grid_size, grid_size)
+    time += dt
+    for pos in snake.positions {
+        for fruit in fruits {
+            if pos.x == fruit.x and pos.y == fruit.y {
+                fruits.pop()
+                snake_length += 1
+            }
+        }
+        let segment_size = snake_size * 0.8 + abs(sin(time)) * snake_size * 0.1
+        let p = pos_to_grid(pos)
+        fill_rect(p.x, p.y, segment_size, segment_size)
+    }
+
+    color(color_white)
+    text('Score: {score}', screen_width / 2, 40)
+}

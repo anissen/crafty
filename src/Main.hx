@@ -1,5 +1,6 @@
 package;
 
+import haxe.io.Path;
 import kha.input.Keyboard;
 import kha.input.Mouse;
 import kha.Assets;
@@ -104,11 +105,23 @@ class Main {
     #end
 
     static function main() {
-        final fileName = 'breakout-ecs.cosy';
+        final fileName = 'snake.cosy';
+        
         #if sys
+        function findFileRecursively(dir: String, fileName: String): String {
+            for (entry in sys.FileSystem.readDirectory(dir)) {
+                if (entry == fileName) return haxe.io.Path.join([dir, fileName]);
+                if (sys.FileSystem.isDirectory(entry)) {
+                    final res = findFileRecursively(Path.join([dir, entry]), fileName);
+                    if (res != null) return res;
+                }
+            }
+            return null;
+        }
+
         final programDir = haxe.io.Path.directory(Sys.programPath());
-        final relativeFilePath = (Sys.args().length > 0) ? Sys.args()[0] : 'assets/games/breakout-ecs.cosy';
-        final file = haxe.io.Path.join([programDir, '../../..', relativeFilePath]);
+        final relativeFilePath = (Sys.args().length > 0) ? Sys.args()[0] : findFileRecursively('assets', fileName);
+        final file = haxe.io.Path.join([programDir, '../../../..', relativeFilePath]);
         trace('Running $file');
         #end
 
